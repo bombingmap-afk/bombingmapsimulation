@@ -38,18 +38,15 @@ const functions = __importStar(require("firebase-functions"));
 const firebase_1 = require("./firebase");
 exports.getBombStats = functions.https.onCall(async (data, context) => {
     const { days, country } = data || {};
-    // --- VALIDATIONS ---
     if (!days || typeof days !== "number" || days <= 0) {
         throw new functions.https.HttpsError("invalid-argument", "'days' must be a positive number.");
     }
     if (country && typeof country !== "string") {
         throw new functions.https.HttpsError("invalid-argument", "'country' must be a string if provided.");
     }
-    // --- TIME WINDOW ---
-    const endDate = new Date(); // today
+    const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    // --- Build query ---
     let query = firebase_1.db.collection("bombs")
         .where("timestamp", ">=", startDate)
         .where("timestamp", "<=", endDate);
@@ -65,23 +62,26 @@ exports.getBombStats = functions.https.onCall(async (data, context) => {
             record: { date: null, count: 0 }
         };
     }
-    // --- Count bombs per day ---
     const dayCounts = {};
     snapshot.forEach(doc => {
         const ts = doc.data().timestamp.toDate();
         const day = ts.toISOString().split("T")[0];
         dayCounts[day] = (dayCounts[day] || 0) + 1;
     });
-    // --- Convert to array ---
-    const daily = Object.entries(dayCounts)
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date));
-    // --- TOTAL ---
+    const daily = [];
+    let loop = new Date(startDate);
+    while (loop <= endDate) {
+        const dateStr = loop.toISOString().split("T")[0];
+        daily.push({
+            date: dateStr,
+            count: dayCounts[dateStr] || 0
+        });
+        loop.setDate(loop.getDate() + 1);
+    }
+    daily.sort((a, b) => a.date.localeCompare(b.date));
     const total = daily.reduce((sum, d) => sum + d.count, 0);
-    // --- AVERAGE ---
     const average = daily.length > 0 ? total / daily.length : 0;
-    // --- RECORD ---
-    const record = daily.reduce((max, d) => (d.count > max.count ? d : max), { date: "", count: 0 });
+    const record = daily.reduce((max, d) => d.count > max.count ? d : max);
     return {
         total,
         average,

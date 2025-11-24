@@ -15,7 +15,7 @@ import { httpsCallable } from "firebase/functions";
 type DailyData = {
   total: number;
   average: number;
-  record: number;
+  record: { count: number; date: string };
   daily: {
     date: string;
     count: number;
@@ -62,10 +62,6 @@ function BombHistoryChart({ data }: BombHistoryChartProps) {
 
   return (
     <div className="bg-gray-700 rounded-xl p-6">
-      <h3 className="text-xl font-bold text-white text-center mb-4">
-        Bomb Evolution (Last 30 Days)
-      </h3>
-
       <div className="w-full h-64">
         <ResponsiveContainer>
           <LineChart data={formattedData}>
@@ -106,7 +102,7 @@ export default function Statistics({ country }: { country?: string }) {
     setIsLoading(true);
     try {
       const { data } = await getBombStats({ days: 30, country: country });
-      setDailyData(data);
+      setDailyData(data as DailyData);
     } catch (err) {
       console.error("Error loading analytics", err);
     } finally {
@@ -120,6 +116,12 @@ export default function Statistics({ country }: { country?: string }) {
         <div className="text-center py-8">
           <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-gray-400">Loading statistics...</p>
+        </div>
+      ) : !dailyData ? (
+        <div className="text-center py-8">
+          <p className="text-gray-400">
+            ⚠️ Error fetching bomb stats. Please try again.
+          </p>
         </div>
       ) : (
         <>
@@ -141,7 +143,7 @@ export default function Statistics({ country }: { country?: string }) {
 
               <div className="bg-gray-700 rounded-lg py-4">
                 <div className="text-2xl font-bold text-green-400">
-                  {Math.round(dailyData?.average * 100) / 100}
+                  {Math.round((dailyData?.average ?? 0) * 100) / 100}
                 </div>
                 <div className="text-sm text-gray-400">Average per Day</div>
               </div>
