@@ -324,7 +324,6 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
   const loadRankings = async (date: string) => {
     setIsLoading(true);
     try {
-      // const trendingData = await getTrendingData();
       const result = await getRankingsCF({ date });
       const trending = result.data.trending;
       const rankingsWithTrend = trending.map((item) => ({

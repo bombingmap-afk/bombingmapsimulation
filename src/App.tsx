@@ -1,8 +1,4 @@
-import {
-  getTotalBombsToday,
-  listenToAllTodaysBombs,
-} from "./services/bombService";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Analytics from "./components/Analytics";
 import CountryRankingsWithCalls from "./components/CountryRankings";
@@ -14,6 +10,7 @@ import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
 import { httpsCallable } from "firebase/functions";
+import { listenToAllTodaysBombs } from "./services/bombService";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 interface UserSession {
@@ -30,18 +27,15 @@ function App() {
     }
   );
 
-  const [totalBombs, setTotalBombs] = useState(0);
-  const [countryBombCounts, setCountryBombCounts] = useState<
-    Map<string, number>
-  >(new Map());
   const [showRankings, setShowRankings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const userCanBomb = canBombToday(userSession.lastBombDate);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
-
+  const [pendingBombs, setPendingBombs] = useState(new Map<string, number>());
+  const [bombCounts, setBombCounts] = useState({
+    countryBombCounts: new Map<string, number>(),
+    totalBombs: 0,
+  });
   const dropBomb = httpsCallable(functions, "dropBomb");
 
   const handleBomb = async (
@@ -59,6 +53,12 @@ function App() {
       alert("You already bombed today!");
       return;
     }
+
+    setPendingBombs((prev) => {
+      const updated = new Map(prev);
+      updated.set(countryName, (updated.get(countryName) || 0) + 1);
+      return updated;
+    });
 
     try {
       // Appel de la Cloud Function (serveur = vrai contrôle IP + session)
@@ -79,6 +79,13 @@ function App() {
       }
     } catch (error: any) {
       // Gestion des erreurs Firebase Functions
+      setPendingBombs((prev) => {
+        const updated = new Map(prev);
+        const current = updated.get(countryName) || 0;
+        if (current <= 1) updated.delete(countryName);
+        else updated.set(countryName, current - 1);
+        return updated;
+      });
       if (error.code === "already-exists") {
         alert("You already sent a bomb today (this session).");
       } else if (error.code === "resource-exhausted") {
@@ -91,29 +98,49 @@ function App() {
   };
 
   useEffect(() => {
-    // Get initial total bombs count
-    getTotalBombsToday().then(setTotalBombs);
+    let timeout: NodeJS.Timeout;
 
-    // Listen to real-time updates for all bombs
     const unsubscribe = listenToAllTodaysBombs((bombCounts) => {
-      setCountryBombCounts(bombCounts);
-      // Update total bombs count
-      const total = Array.from(bombCounts.values()).reduce(
-        (sum, count) => sum + count,
-        0
-      );
-      setTotalBombs(total);
+      clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
+        const total = Array.from(bombCounts.values()).reduce(
+          (sum, count) => sum + count,
+          0
+        );
+
+        setBombCounts({
+          countryBombCounts: bombCounts,
+          totalBombs: total,
+        });
+
+        setPendingBombs(new Map());
+      }, 300);
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(timeout);
+      unsubscribe();
+    };
   }, []);
+
+  const effectiveBombCounts = new Map(bombCounts.countryBombCounts);
+
+  pendingBombs.forEach((count, country) => {
+    const current = effectiveBombCounts.get(country) || 0;
+    effectiveBombCounts.set(country, current + count);
+  });
+
+  const maxBombs = useMemo(() => {
+    return Math.max(...Array.from(bombCounts.countryBombCounts.values()), 1);
+  }, [bombCounts]);
 
   return (
     <div className="min-h-screen bg-gray-900">
       <LegalDisclaimer />
 
       <Header
-        totalBombs={totalBombs}
+        totalBombs={bombCounts.totalBombs}
         userCanBomb={userCanBomb}
         onShowRankings={() => setShowRankings(true)}
         onShowAnalytics={() => setShowAnalytics(true)}
@@ -125,7 +152,8 @@ function App() {
           <WorldMap
             userCanBomb={userCanBomb}
             onBomb={handleBomb}
-            countryBombCounts={countryBombCounts}
+            countryBombCounts={bombCounts.countryBombCounts}
+            maxBombs={maxBombs}
           />
         </div>
       </main>

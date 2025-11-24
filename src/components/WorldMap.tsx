@@ -21,6 +21,7 @@ interface WorldMapProps {
     source?: string
   ) => void;
   countryBombCounts: Map<string, number>;
+  maxBombs: number;
 }
 
 const microStates = [
@@ -72,10 +73,53 @@ const microStates = [
   { name: "Dominica", coordinates: [-61.370976, 15.414999] },
 ];
 
+const MemoGeography = React.memo(
+  ({
+    geo,
+    countryName,
+    getCountryFill,
+    darkenColor,
+    handleCountryClick,
+    setHoveredCountry,
+  }: {
+    geo: any;
+    countryName: string;
+    getCountryFill: (name: string) => string;
+    darkenColor: (hex: string, percent: number) => string;
+    handleCountryClick: (name: string) => void;
+    setHoveredCountry: React.Dispatch<React.SetStateAction<string | null>>;
+  }) => {
+    return (
+      <Geography
+        key={geo.rsmKey}
+        geography={geo}
+        onMouseEnter={() => setHoveredCountry(countryName)}
+        onMouseLeave={() => setHoveredCountry(null)}
+        onClick={() => handleCountryClick(countryName)}
+        style={{
+          default: {
+            fill: getCountryFill(countryName),
+            stroke: "#374151",
+            strokeWidth: 0.5,
+            outline: "none",
+            cursor: "pointer",
+          },
+          hover: {
+            fill: darkenColor(getCountryFill(countryName), 20),
+            cursor: "pointer",
+          },
+          pressed: { outline: "none" },
+        }}
+      />
+    );
+  }
+);
+
 const WorldMap: React.FC<WorldMapProps> = ({
   userCanBomb,
   onBomb,
   countryBombCounts,
+  maxBombs,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -114,7 +158,6 @@ const WorldMap: React.FC<WorldMapProps> = ({
 
   const getCountryFill = (countryName: string): string => {
     const bombCount = countryBombCounts.get(countryName) || 0;
-    const maxBombs = Math.max(...Array.from(countryBombCounts.values()), 1);
     const isHovered = hoveredCountry === countryName;
 
     if (isHovered) return "#3B82F6";
@@ -195,26 +238,14 @@ const WorldMap: React.FC<WorldMapProps> = ({
                 geographies.map((geo) => {
                   const countryName = geo.properties.name;
                   return (
-                    <Geography
+                    <MemoGeography
                       key={geo.rsmKey}
-                      geography={geo}
-                      onMouseEnter={() => setHoveredCountry(countryName)}
-                      onMouseLeave={() => setHoveredCountry(null)}
-                      onClick={() => handleCountryClick(countryName)}
-                      style={{
-                        default: {
-                          fill: getCountryFill(countryName),
-                          stroke: "#374151",
-                          strokeWidth: 0.5,
-                          outline: "none",
-                          cursor: "pointer",
-                        },
-                        hover: {
-                          fill: darkenColor(getCountryFill(countryName), 20),
-                          cursor: "pointer",
-                        },
-                        pressed: { outline: "none" },
-                      }}
+                      geo={geo}
+                      countryName={countryName}
+                      getCountryFill={getCountryFill}
+                      darkenColor={darkenColor}
+                      handleCountryClick={handleCountryClick}
+                      setHoveredCountry={setHoveredCountry}
                     />
                   );
                 })
