@@ -68,6 +68,7 @@ const microStates = [
     name: "Saint Vincent and the Grenadines",
     coordinates: [-61.287228, 13.252778],
   },
+  { name: "São Tomé and Príncipe", coordinates: [6.6131, 0.1864] },
   { name: "Dominica", coordinates: [-61.370976, 15.414999] },
 ];
 
@@ -225,7 +226,7 @@ const WorldMap: React.FC<WorldMapProps> = ({
               return (
                 <Marker
                   key={state.name}
-                  coordinates={state.coordinates}
+                  coordinates={state.coordinates as [number, number]}
                   onClick={() => handleCountryClick(state.name)}
                   onMouseEnter={() => setHoveredCountry(state.name)}
                   onMouseLeave={() => setHoveredCountry(null)}

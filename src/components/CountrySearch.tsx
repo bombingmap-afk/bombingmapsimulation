@@ -59,6 +59,7 @@ const CountrySearch: React.FC<CountrySearchProps> = ({ onCountrySelect }) => {
     "Saint Lucia",
     "Saint Vincent and the Grenadines",
     "Dominica",
+    "São Tomé and Príncipe",
   ];
 
   // Load countries from the same source as the map
