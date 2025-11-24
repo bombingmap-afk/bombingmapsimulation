@@ -32,13 +32,20 @@ export const getRankings = functions.https.onCall(
     const today = d.toISOString().split("T")[0];
     const yesterday = dYesterday.toISOString().split("T")[0];
 
+    /**
+     * Récupère et retourne la liste triée [{ country, bombCount, rank }]
+     * en appliquant un classement qui donne le même rank en cas d'égalité.
+     *
+     * Ici j'implémente le "standard competition ranking" (1224).
+     */
     const getRankings = async (day: string) => {
       const { start, end } = getDateRange(day);
 
       const snap = await db
         .collection("bombs")
         .where("timestamp", ">=", start)
-        .where("timestamp", "<", end).get();
+        .where("timestamp", "<", end)
+        .get();
 
       const counts: Record<string, number> = {};
       snap.forEach(doc => {
@@ -46,10 +53,31 @@ export const getRankings = functions.https.onCall(
         counts[c] = (counts[c] || 0) + 1;
       });
 
-      return Object.entries(counts)
+      // array trié par bombCount descendant
+      const sorted = Object.entries(counts)
         .map(([country, bombCount]) => ({ country, bombCount }))
-        .sort((a, b) => b.bombCount - a.bombCount)
-        .map((entry, i) => ({ ...entry, rank: i + 1 }));
+        .sort((a, b) => b.bombCount - a.bombCount);
+
+      // assignation de rangs avec gestion des égalités (standard competition ranking)
+      const result: Array<{ country: string; bombCount: number; rank: number }> = [];
+      let prevCount: number | null = null;
+      let prevRank = 0;
+
+      for (let i = 0; i < sorted.length; i++) {
+        const item = sorted[i];
+        if (prevCount !== null && item.bombCount === prevCount) {
+          // même bombCount => même rang que le précédent
+          result.push({ ...item, rank: prevRank });
+        } else {
+          // différent => rang = position (i) + 1
+          const rank = i + 1;
+          prevRank = rank;
+          prevCount = item.bombCount;
+          result.push({ ...item, rank });
+        }
+      }
+
+      return result;
     };
 
     const [todayR, yesterdayR] = await Promise.all([
