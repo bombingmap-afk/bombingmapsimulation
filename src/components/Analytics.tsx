@@ -30,7 +30,6 @@ export default function Analytics({ isOpen, onClose }: AnalyticsProps) {
         id="analytics-modal"
         className="bg-gray-800 rounded-lg w-full max-w-6xl max-h-screen overflow-hidden shadow-2xl"
       >
-        {/* Header */}
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -47,7 +46,6 @@ export default function Analytics({ isOpen, onClose }: AnalyticsProps) {
             </button>
           </div>
         </div>
-
         <Statistics />
       </div>
     </div>

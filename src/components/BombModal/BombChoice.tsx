@@ -30,7 +30,6 @@ const BombChoice: React.FC<BombChoiceProps> = ({
           </p>
         </div>
       </div>
-
       <div className="space-y-4">
         <button
           onClick={() => onModeChange("bomb")}
@@ -47,10 +46,11 @@ const BombChoice: React.FC<BombChoiceProps> = ({
         >
           <Bomb className="w-5 h-5" />
           <span className="text-lg font-semibold">
-            {userCanBomb ? "Drop Bomb Here" : "Already Bombed Today"}
+            {userCanBomb
+              ? "Drop Bomb Here"
+              : "You can't bomb anymore for today"}
           </span>
         </button>
-
         <button
           onClick={() => onModeChange("history")}
           className="w-full py-4 px-6 rounded-lg transition-all duration-200
@@ -60,7 +60,6 @@ const BombChoice: React.FC<BombChoiceProps> = ({
           <History className="w-5 h-5" />
           <span className="text-lg font-semibold">View Today's Bombs</span>
         </button>
-
         <button
           onClick={() => onModeChange("stats")}
           className="w-full py-4 px-6 rounded-lg transition-all duration-200

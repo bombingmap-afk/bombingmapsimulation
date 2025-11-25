@@ -29,7 +29,6 @@ const CountryStats: React.FC<CountryStatsProps> = ({ countryName, onBack }) => {
             Evolution Last 30 Days
           </h3>
         </div>
-
         <Statistics country={countryName} />
       </div>
       <button

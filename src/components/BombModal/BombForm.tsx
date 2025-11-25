@@ -5,7 +5,6 @@ import { flags } from "../../utils/countryFlags";
 
 interface BombFormProps {
   countryName: string;
-  isLoading: boolean;
   onBomb: (message: string, gifUrl?: string, source?: string) => void;
   onBack: () => void;
 }
@@ -102,12 +101,7 @@ const GIF: React.FC<{
   );
 };
 
-const BombForm: React.FC<BombFormProps> = ({
-  countryName,
-  isLoading,
-  onBomb,
-  onBack,
-}) => {
+const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
   const [message, setMessage] = useState("");
   const [gifUrl, setGifUrl] = useState("");
   const [source, setSource] = useState("");
@@ -243,7 +237,6 @@ const BombForm: React.FC<BombFormProps> = ({
         handleGifUrlChange={handleGifUrlChange}
         isValidGifUrl={isValidGifUrl}
       />
-      {/* 🌍 Champ pays attaquant (auto-complete) */}
       <div ref={containerRef}>
         <label className="block text-white font-medium mb-2">
           Attacking Country
@@ -270,7 +263,6 @@ const BombForm: React.FC<BombFormProps> = ({
               <X className="h-5 w-5" />
             </button>
           )}
-
           {isOpen && filteredCountries.length > 0 && (
             <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto">
               {filteredCountries.map((country, index) => (
@@ -294,8 +286,6 @@ const BombForm: React.FC<BombFormProps> = ({
           )}
         </div>
       </div>
-
-      {/* Boutons */}
       <div className="flex space-x-3">
         <button
           onClick={onBack}
@@ -306,12 +296,11 @@ const BombForm: React.FC<BombFormProps> = ({
         </button>
         <button
           onClick={handleBomb}
-          disabled={isLoading}
           className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-600
                    disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200
                    transform hover:scale-105 disabled:transform-none"
         >
-          {isLoading ? "💣 Dropping..." : "💣 Drop Bomb"}
+          💣 Drop Bomb
         </button>
       </div>
     </div>

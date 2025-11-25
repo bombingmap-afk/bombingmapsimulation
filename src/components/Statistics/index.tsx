@@ -92,7 +92,6 @@ export default function Statistics({ country }: { country?: string }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const getBombStats = httpsCallable(functions, "getBombStats");
-  console.log(country);
 
   useEffect(() => {
     loadAnalytics();

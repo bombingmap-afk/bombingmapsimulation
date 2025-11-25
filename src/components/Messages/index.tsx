@@ -113,7 +113,12 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
       className="flex-1 overflow-y-auto p-4 space-y-3"
       style={{ height: "calc(100vh - 120px)" }}
     >
-      {messages.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <div className="text-center py-4">
+          <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+          <p className="text-gray-400 text-sm">Loading messages...</p>
+        </div>
+      ) : messages.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🕊️</div>
           <p className="text-gray-400">
@@ -177,15 +182,6 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
               </div>
             </div>
           ))}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="text-center py-4">
-              <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-              <p className="text-gray-400 text-sm">Loading messages...</p>
-            </div>
-          )}
-
           {/* End of messages */}
           {!hasMore && messages.length > 0 && (
             <div className="text-center py-4">

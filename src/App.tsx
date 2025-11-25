@@ -10,6 +10,7 @@ import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
 import { httpsCallable } from "firebase/functions";
+import toast from "react-hot-toast";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 interface UserSession {
@@ -49,7 +50,7 @@ function App() {
 
     // On vérifie côté client (UX uniquement, pas sécurité)
     if (!canBombToday(userSession.lastBombDate)) {
-      alert("You already bombed today!");
+      toast.error("You already bombed today!");
       return;
     }
 
@@ -86,13 +87,12 @@ function App() {
         return updated;
       });
       if (error.code === "already-exists") {
-        alert("You already sent a bomb today (this session).");
+        toast.error("You already bombed today!");
       } else if (error.code === "resource-exhausted") {
-        alert("Your IP has reached the daily limit (3 bombs per day).");
+        toast.error("Your IP has reached the daily limit.");
       } else {
-        alert("An error occurred while sending your bomb.");
+        toast.error("An error occurred while sending your bomb.");
       }
-      console.error("dropBomb error", error);
     }
   };
 
@@ -103,10 +103,7 @@ function App() {
 
     const load = async () => {
       const { data } = await getCountryBombStatsFn({ days: 1 });
-
-      console.log(data);
       const stats = data as any;
-
       const countryMap = new Map<string, number>(
         Object.entries(stats.countryCounts || {})
       );

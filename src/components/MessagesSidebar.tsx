@@ -16,13 +16,10 @@ const MessagesSidebar: React.FC<MessagesSidebarProps> = ({
 
   return (
     <>
-      {/* Overlay */}
       <div
         className="fixed inset-0 bg-black bg-opacity-50 z-40"
         onClick={onClose}
       />
-
-      {/* Sidebar */}
       <div
         className={`
         fixed top-0 right-0 h-full w-96 bg-gray-800 shadow-2xl z-50
@@ -30,7 +27,6 @@ const MessagesSidebar: React.FC<MessagesSidebarProps> = ({
         ${isOpen ? "translate-x-0" : "translate-x-full"}
       `}
       >
-        {/* Header */}
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -48,7 +44,6 @@ const MessagesSidebar: React.FC<MessagesSidebarProps> = ({
             Real-time messages from bombers worldwide
           </p>
         </div>
-
         <MessagesList />
       </div>
     </>

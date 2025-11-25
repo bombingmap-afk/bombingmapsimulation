@@ -124,7 +124,6 @@ const WorldMap: React.FC<WorldMapProps> = ({
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleCountryClick = (countryName: string) => {
     setSelectedCountry(countryName);
@@ -137,16 +136,7 @@ const WorldMap: React.FC<WorldMapProps> = ({
     source?: string
   ) => {
     if (!selectedCountry) return;
-
-    setIsLoading(true);
-    try {
-      onBomb(selectedCountry, message, gifUrl, source);
-    } catch (error) {
-      console.error("Error dropping bomb:", error);
-      alert("Failed to drop bomb. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    onBomb(selectedCountry, message, gifUrl, source);
     setShowModal(false);
     setSelectedCountry(null);
   };
@@ -289,7 +279,6 @@ const WorldMap: React.FC<WorldMapProps> = ({
           userCanBomb={userCanBomb}
           onBomb={handleBomb}
           onClose={handleCloseModal}
-          isLoading={isLoading}
           nbTodayBombs={countryBombCounts.get(selectedCountry) ?? 0}
         />
       )}

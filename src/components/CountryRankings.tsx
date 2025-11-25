@@ -16,10 +16,8 @@ import ReactDOM from "react-dom";
 import { functions } from "../config/firebase";
 import { getCountryFlag } from "../utils/countryFlags";
 import { httpsCallable } from "firebase/functions";
+import toast from "react-hot-toast";
 
-/* -------------------------------------------------------------------------- */
-/* 🏆 COUNTRY RANKINGS COMPONENT                                              */
-/* -------------------------------------------------------------------------- */
 interface CountryRanking {
   country: string;
   bombCount: number;
@@ -99,7 +97,6 @@ const CountryRankingsContent: React.FC<{
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Chart View */}
           <div className="space-y-4">
             {rankings.map((country) => (
               <div key={country.country} className="space-y-2">
@@ -230,7 +227,6 @@ const CountryRankingsDateSection: React.FC<{
 
   return (
     <div className="flex items-center justify-between mb-4 gap-2 text-center relative">
-      {/* Previous button */}
       <button
         onClick={() => navigateDate("prev")}
         className="flex items-center justify-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors min-w-[40px]"
@@ -238,8 +234,6 @@ const CountryRankingsDateSection: React.FC<{
         <ChevronLeft className="w-5 h-5" />
         <span className="hidden sm:inline">Older</span>
       </button>
-
-      {/* Middle date display + calendar */}
       <div className="flex items-center justify-center space-x-2 text-white relative">
         <button
           onClick={() => setShowCalendar((s) => !s)}
@@ -250,8 +244,6 @@ const CountryRankingsDateSection: React.FC<{
             {formatDate(selectedDate)}
           </span>
         </button>
-
-        {/* POPUP CALENDAR */}
         {showCalendar &&
           ReactDOM.createPortal(
             <div
@@ -286,8 +278,6 @@ const CountryRankingsDateSection: React.FC<{
             document.body
           )}
       </div>
-
-      {/* Next button */}
       <button
         onClick={() => navigateDate("next")}
         disabled={selectedDate === toLocalYMD(new Date())}
@@ -335,7 +325,7 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
       }));
       setRankings(rankingsWithTrend);
     } catch (error) {
-      console.error("Error loading rankings:", error);
+      toast.error("Error loading rankings");
       setRankings([]);
     } finally {
       setIsLoading(false);

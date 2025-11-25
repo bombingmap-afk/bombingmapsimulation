@@ -11,7 +11,6 @@ interface BombModalProps {
   userCanBomb: boolean;
   onBomb: (message: string, gifUrl?: string, source?: string) => void;
   onClose: () => void;
-  isLoading: boolean;
   nbTodayBombs: number;
 }
 
@@ -20,14 +19,12 @@ const BombModal: React.FC<BombModalProps> = ({
   userCanBomb,
   onBomb,
   onClose,
-  isLoading,
   nbTodayBombs,
 }) => {
   const [mode, setMode] = useState<"choice" | "bomb" | "history" | "stats">(
     "choice"
   );
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const modal = document.getElementById("bomb-modal");
@@ -87,7 +84,6 @@ const BombModal: React.FC<BombModalProps> = ({
               <X className="w-6 h-6" />
             </button>
           </div>
-
           {mode === "choice" && (
             <BombChoice
               countryName={countryName}
@@ -96,16 +92,13 @@ const BombModal: React.FC<BombModalProps> = ({
               onModeChange={setMode}
             />
           )}
-
           {mode === "bomb" && (
             <BombForm
               countryName={countryName}
-              isLoading={isLoading}
               onBomb={handleBomb}
               onBack={handleBack}
             />
           )}
-
           {mode === "history" && (
             <BombHistory
               countryName={countryName}
@@ -113,7 +106,6 @@ const BombModal: React.FC<BombModalProps> = ({
               onBack={handleBack}
             />
           )}
-
           {mode === "stats" && (
             <CountryStats countryName={countryName} onBack={handleBack} />
           )}
