@@ -1,6 +1,4 @@
-// Mapping des drapeaux par pays
 export const flags: { [key: string]: string } = {
-  // Europe
   "France": "🇫🇷",
   "Germany": "🇩🇪",
   "United Kingdom": "🇬🇧",
@@ -41,8 +39,6 @@ export const flags: { [key: string]: string } = {
   "Ukraine": "🇺🇦",
   "Belarus": "🇧🇾",
   "Russia": "🇷🇺",
-  
-  // Amérique du Nord
   "United States of America": "🇺🇸",
   "Canada": "🇨🇦",
   "Mexico": "🇲🇽",
@@ -59,8 +55,6 @@ export const flags: { [key: string]: string } = {
   "Haiti": "🇭🇹",
   "Dominican Republic": "🇩🇴",
   "Puerto Rico": "🇵🇷",
-  
-  // Amérique du Sud
   "Brazil": "🇧🇷",
   "Argentina": "🇦🇷",
   "Chile": "🇨🇱",
@@ -73,8 +67,6 @@ export const flags: { [key: string]: string } = {
   "Uruguay": "🇺🇾",
   "Guyana": "🇬🇾",
   "Suriname": "🇸🇷",
-  
-  // Asie
   "China": "🇨🇳",
   "Japan": "🇯🇵",
   "South Korea": "🇰🇷",
@@ -121,8 +113,6 @@ export const flags: { [key: string]: string } = {
   "Armenia": "🇦🇲",
   "Azerbaijan": "🇦🇿",
   "Timor-Leste": "🇹🇱",
-  
-  // Afrique
   "Egypt": "🇪🇬",
   "Libya": "🇱🇾",
   "Tunisia": "🇹🇳",
@@ -179,8 +169,6 @@ export const flags: { [key: string]: string } = {
   "Lesotho": "🇱🇸",
   "Eswatini": "🇸🇿",
   "Somaliland": "🏴",
-  
-  // Océanie
   "Australia": "🇦🇺",
   "New Zealand": "🇳🇿",
   "Papua New Guinea": "🇵🇬",
@@ -201,8 +189,6 @@ export const flags: { [key: string]: string } = {
   "American Samoa": "🇦🇸",
   "Guam": "🇬🇺",
   "Northern Mariana Islands": "🇲🇵",
-  
-  // Territoires et autres
   "Greenland": "🇬🇱",
   "Faroe Islands": "🇫🇴",
   "Gibraltar": "🇬🇮",

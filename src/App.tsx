@@ -36,7 +36,16 @@ function App() {
     countryBombCounts: new Map<string, number>(),
     totalBombs: 0,
   });
-  const dropBomb = httpsCallable(functions, "dropBomb");
+  const dropBomb = httpsCallable<
+    {
+      country: string;
+      message: string;
+      sessionId: string;
+      gifUrl: string | null;
+      source: string | null;
+    },
+    { ok: boolean }
+  >(functions, "dropBomb");
 
   const handleBomb = async (
     countryName: string,
@@ -48,7 +57,6 @@ function App() {
       localStorage.getItem("bombMapSessionId") || crypto.randomUUID();
     localStorage.setItem("bombMapSessionId", sessionId);
 
-    // On vérifie côté client (UX uniquement, pas sécurité)
     if (!canBombToday(userSession.lastBombDate)) {
       toast.error("You already bombed today!");
       return;
@@ -61,7 +69,6 @@ function App() {
     });
 
     try {
-      // Appel de la Cloud Function (serveur = vrai contrôle IP + session)
       const result = await dropBomb({
         country: countryName,
         message,
@@ -70,7 +77,6 @@ function App() {
         source: source || null,
       });
 
-      // Si le serveur renvoie ok:true, on met à jour la session locale
       if (result.data?.ok) {
         setUserSession({
           lastBombDate: new Date().toISOString(),
@@ -78,7 +84,6 @@ function App() {
         });
       }
     } catch (error: any) {
-      // Gestion des erreurs Firebase Functions
       setPendingBombs((prev) => {
         const updated = new Map(prev);
         const current = updated.get(countryName) || 0;
@@ -115,7 +120,7 @@ function App() {
 
       setPendingBombs(new Map());
 
-      timeout = setTimeout(load, 3000); // rafraîchit toutes les 3s
+      timeout = setTimeout(load, 3000);
     };
 
     load();

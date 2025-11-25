@@ -18,6 +18,17 @@ import { getCountryFlag } from "../utils/countryFlags";
 import { httpsCallable } from "firebase/functions";
 import toast from "react-hot-toast";
 
+interface TrendingItem {
+  country: string;
+  bombCount: number;
+  todayRank: number;
+  yesterdayRank: number;
+  change: number;
+}
+interface RankingsResponse {
+  trending: TrendingItem[];
+}
+
 interface CountryRanking {
   country: string;
   bombCount: number;
@@ -305,7 +316,10 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const getRankingsCF = httpsCallable(functions, "getRankings");
+  const getRankingsCF = httpsCallable<{ date: string }, RankingsResponse>(
+    functions,
+    "getRankings"
+  );
 
   useEffect(() => {
     loadRankings(selectedDate);

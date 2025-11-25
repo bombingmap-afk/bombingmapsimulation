@@ -25,7 +25,10 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
   const [offset, setOffset] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const getCountryMessagesFn = httpsCallable(functions, "getCountryMessages");
+  const getCountryMessagesFn = httpsCallable<
+    { country?: string; days: number; limit: number; offset: number },
+    { messages: Message[]; total: number }
+  >(functions, "getCountryMessages");
 
   useEffect(() => {
     loadInitialMessages();
@@ -155,7 +158,6 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
                   <span>{formatTime(message.timestamp)}</span>
                 </div>
               </div>
-
               <div className="bg-gray-800 rounded p-3">
                 <p className="text-gray-200 italic">"{message.message}"</p>
               </div>
@@ -182,7 +184,6 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
               </div>
             </div>
           ))}
-          {/* End of messages */}
           {!hasMore && messages.length > 0 && (
             <div className="text-center py-4">
               <p className="text-gray-500 text-sm">

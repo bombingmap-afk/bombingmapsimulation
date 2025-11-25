@@ -107,8 +107,6 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
   const [source, setSource] = useState("");
   const [messageError, setMessageError] = useState("");
   const [gifError, setGifError] = useState("");
-
-  // Auto-complete state
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
@@ -120,7 +118,6 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
     ([country, flag]) => `${flag} ${country}`
   );
 
-  // 🔍 Vérifie si l’URL du GIF semble valide
   const isValidGifUrl = (url: string): boolean => {
     if (!url.trim()) return true;
     const pattern = /(https?:\/\/)?(www\.)?giphy\.com\/[^\s]+/i;
@@ -159,7 +156,6 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
     onBomb(message, gifUrl || undefined, source || undefined);
   };
 
-  // --- Auto-complete logic ---
   useEffect(() => {
     if (searchTerm.trim()) {
       const filtered = countries
@@ -175,7 +171,6 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
     }
   }, [searchTerm]);
 
-  // Close dropdown if click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

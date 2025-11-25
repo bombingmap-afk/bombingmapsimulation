@@ -51,13 +51,11 @@ function fillMissingDays(
 function BombHistoryChart({ data }: BombHistoryChartProps) {
   if (!data || data.length === 0) return null;
 
-  // ✅ Remplir les jours manquants
   const filledData = fillMissingDays(data, 30);
 
-  // ✅ Formater pour affichage
   const formattedData = filledData.map((item) => ({
     ...item,
-    shortDate: item.date.slice(5), // MM-DD
+    shortDate: item.date.slice(5),
   }));
 
   return (
@@ -123,42 +121,38 @@ export default function Statistics({ country }: { country?: string }) {
           </p>
         </div>
       ) : (
-        <>
-          <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-white mb-2">
-                Bombing Evolution
-              </h3>
-              <p className="text-gray-400">Trend over the last 30 days</p>
+        <div className="space-y-6">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-white mb-2">
+              Bombing Evolution
+            </h3>
+            <p className="text-gray-400">Trend over the last 30 days</p>
+          </div>
+          <BombHistoryChart data={dailyData?.daily} />
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-gray-700 rounded-lg p-4">
+              <div className="text-2xl font-bold text-blue-400">
+                {dailyData?.total}
+              </div>
+              <div className="text-sm text-gray-400">Total Bombs</div>
             </div>
-            <BombHistoryChart data={dailyData?.daily} />
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-2xl font-bold text-blue-400">
-                  {dailyData?.total}
-                </div>
-                <div className="text-sm text-gray-400">Total Bombs</div>
+            <div className="bg-gray-700 rounded-lg py-4">
+              <div className="text-2xl font-bold text-green-400">
+                {Math.round((dailyData?.average ?? 0) * 100) / 100}
               </div>
-
-              <div className="bg-gray-700 rounded-lg py-4">
-                <div className="text-2xl font-bold text-green-400">
-                  {Math.round((dailyData?.average ?? 0) * 100) / 100}
-                </div>
-                <div className="text-sm text-gray-400">Average per Day</div>
+              <div className="text-sm text-gray-400">Average per Day</div>
+            </div>
+            <div className="bg-gray-700 rounded-lg p-4">
+              <div className="text-2xl font-bold text-red-400 flex gap-2 justify-center items-end">
+                {dailyData?.record.count}
+                <span className="text-lg font-bold text-red-400">
+                  ({dailyData?.record.date})
+                </span>
               </div>
-
-              <div className="bg-gray-700 rounded-lg p-4">
-                <div className="text-2xl font-bold text-red-400 flex gap-2 justify-center items-end">
-                  {dailyData?.record.count}
-                  <span className="text-lg font-bold text-red-400">
-                    ({dailyData?.record.date})
-                  </span>
-                </div>
-                <div className="text-sm text-gray-400">Daily Record</div>
-              </div>
+              <div className="text-sm text-gray-400">Daily Record</div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
