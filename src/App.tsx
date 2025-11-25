@@ -10,7 +10,6 @@ import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
 import { httpsCallable } from "firebase/functions";
-import { listenToAllTodaysBombs } from "./services/bombService";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 interface UserSession {
@@ -97,31 +96,34 @@ function App() {
     }
   };
 
+  const getCountryBombStatsFn = httpsCallable(functions, "getCountryBombStats");
+
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
-    const unsubscribe = listenToAllTodaysBombs((bombCounts) => {
-      clearTimeout(timeout);
+    const load = async () => {
+      const { data } = await getCountryBombStatsFn({ days: 1 });
 
-      timeout = setTimeout(() => {
-        const total = Array.from(bombCounts.values()).reduce(
-          (sum, count) => sum + count,
-          0
-        );
+      console.log(data);
+      const stats = data as any;
 
-        setBombCounts({
-          countryBombCounts: bombCounts,
-          totalBombs: total,
-        });
+      const countryMap = new Map<string, number>(
+        Object.entries(stats.countryCounts || {})
+      );
 
-        setPendingBombs(new Map());
-      }, 300);
-    });
+      setBombCounts({
+        countryBombCounts: countryMap,
+        totalBombs: stats.total,
+      });
 
-    return () => {
-      clearTimeout(timeout);
-      unsubscribe();
+      setPendingBombs(new Map());
+
+      timeout = setTimeout(load, 3000); // rafraîchit toutes les 3s
     };
+
+    load();
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const effectiveBombCounts = new Map(bombCounts.countryBombCounts);

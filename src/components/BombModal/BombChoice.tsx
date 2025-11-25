@@ -1,19 +1,18 @@
 import { BarChart3, Bomb, History } from "lucide-react";
 
-import { BombData } from "../../services/bombService";
 import React from "react";
 import { getCountryFlag } from "../../utils/countryFlags";
 
 interface BombChoiceProps {
   countryName: string;
-  todaysBombs: BombData[];
+  nbTodayBombs: number;
   userCanBomb: boolean;
   onModeChange: (mode: "bomb" | "history" | "stats") => void;
 }
 
 const BombChoice: React.FC<BombChoiceProps> = ({
   countryName,
-  todaysBombs,
+  nbTodayBombs,
   userCanBomb,
   onModeChange,
 }) => {
@@ -26,8 +25,8 @@ const BombChoice: React.FC<BombChoiceProps> = ({
         </div>
         <div className="bg-gray-700 rounded-lg p-3 mb-4">
           <p className="text-gray-300">
-            <span className="text-red-400 font-bold">{todaysBombs.length}</span>{" "}
-            bomb{todaysBombs.length !== 1 ? "s" : ""} dropped today
+            <span className="text-red-400 font-bold">{nbTodayBombs}</span> bomb
+            {nbTodayBombs > 1 ? "s" : ""} dropped today
           </p>
         </div>
       </div>

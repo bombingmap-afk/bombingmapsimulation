@@ -290,6 +290,7 @@ const WorldMap: React.FC<WorldMapProps> = ({
           onBomb={handleBomb}
           onClose={handleCloseModal}
           isLoading={isLoading}
+          nbTodayBombs={countryBombCounts.get(selectedCountry) ?? 0}
         />
       )}
     </div>

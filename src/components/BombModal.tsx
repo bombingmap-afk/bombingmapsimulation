@@ -1,4 +1,3 @@
-import { BombData, listenToCountryBombs } from "../services/bombService";
 import React, { useEffect, useState } from "react";
 
 import BombChoice from "./BombModal/BombChoice";
@@ -6,7 +5,6 @@ import BombForm from "./BombModal/BombForm";
 import BombHistory from "./BombModal/BombHistory";
 import CountryStats from "./BombModal/CountryStats";
 import { X } from "lucide-react";
-import { getCountryAnalytics } from "../services/countryAnalyticsService";
 
 interface BombModalProps {
   countryName: string;
@@ -14,6 +12,7 @@ interface BombModalProps {
   onBomb: (message: string, gifUrl?: string, source?: string) => void;
   onClose: () => void;
   isLoading: boolean;
+  nbTodayBombs: number;
 }
 
 const BombModal: React.FC<BombModalProps> = ({
@@ -22,15 +21,11 @@ const BombModal: React.FC<BombModalProps> = ({
   onBomb,
   onClose,
   isLoading,
+  nbTodayBombs,
 }) => {
   const [mode, setMode] = useState<"choice" | "bomb" | "history" | "stats">(
     "choice"
   );
-  const [todaysBombs, setTodaysBombs] = useState<BombData[]>([]);
-  const [dailyData, setDailyData] = useState<
-    Array<{ date: string; count: number }>
-  >([]);
-  const [statsLoading, setStatsLoading] = useState(false);
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -44,39 +39,6 @@ const BombModal: React.FC<BombModalProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
-
-  // Listen to country bombs
-  useEffect(() => {
-    if (!countryName) return;
-
-    const unsubscribe = listenToCountryBombs(countryName, (bombs) => {
-      setTodaysBombs(bombs);
-    });
-
-    return unsubscribe;
-  }, [countryName]);
-
-  const loadCountryStats = async () => {
-    if (!countryName) return;
-
-    setStatsLoading(true);
-    try {
-      const { dailyData } = await getCountryAnalytics(countryName);
-      setDailyData(dailyData || []);
-    } catch (error) {
-      console.error("Error loading country stats:", error);
-      setDailyData([]);
-    } finally {
-      setStatsLoading(false);
-    }
-  };
-
-  const handleModeChange = (newMode: "bomb" | "history" | "stats") => {
-    if (newMode === "stats") {
-      loadCountryStats();
-    }
-    setMode(newMode);
-  };
 
   const handleBomb = (message: string, gifUrl?: string, source?: string) => {
     onBomb(message, gifUrl, source);
@@ -96,7 +58,7 @@ const BombModal: React.FC<BombModalProps> = ({
       >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <div className="w-6 h-6" /> {/* Spacer */}
+            <div className="w-6 h-6" />
             <div className="flex space-x-2">
               {mode !== "choice" && (
                 <div className="flex space-x-1">
@@ -129,9 +91,9 @@ const BombModal: React.FC<BombModalProps> = ({
           {mode === "choice" && (
             <BombChoice
               countryName={countryName}
-              todaysBombs={todaysBombs}
+              nbTodayBombs={nbTodayBombs}
               userCanBomb={userCanBomb}
-              onModeChange={handleModeChange}
+              onModeChange={setMode}
             />
           )}
 
@@ -147,18 +109,13 @@ const BombModal: React.FC<BombModalProps> = ({
           {mode === "history" && (
             <BombHistory
               countryName={countryName}
-              todaysBombs={todaysBombs}
+              nbTodayBombs={nbTodayBombs}
               onBack={handleBack}
             />
           )}
 
           {mode === "stats" && (
-            <CountryStats
-              countryName={countryName}
-              dailyData={dailyData}
-              isLoading={statsLoading}
-              onBack={handleBack}
-            />
+            <CountryStats countryName={countryName} onBack={handleBack} />
           )}
         </div>
       </div>
