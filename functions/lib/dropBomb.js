@@ -108,6 +108,7 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
     const sessionDocId = todayKey("session", sessionId);
     const ipDocRef = firebase_1.db.collection("ipCounters").doc(ipDocId);
     const sessionDocRef = firebase_1.db.collection("sessions").doc(sessionDocId);
+    const statsDailyRef = firebase_1.db.collection("stats_daily").doc(getDayString());
     const bombsRef = firebase_1.db.collection("bombs").doc();
     try {
         await firebase_1.db.runTransaction(async (tx) => {
@@ -126,14 +127,19 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
                     throw new functions.https.HttpsError("already-exists", "This session has already sent a bomb today");
                 }
             }
+            const nextMidnight = new Date();
+            nextMidnight.setUTCHours(24, 0, 0, 0);
+            const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
             tx.set(ipDocRef, {
                 count: ipCount + 1,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                expiresAt,
             }, { merge: true });
             const nowIso = new Date().toISOString();
             tx.set(sessionDocRef, {
                 lastBombDate: nowIso,
-                createdAt: admin.firestore.FieldValue.serverTimestamp()
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                expiresAt,
             }, { merge: true });
             tx.set(bombsRef, {
                 country,
@@ -142,14 +148,13 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
                 source: source !== null && source !== void 0 ? source : null,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
             });
+            tx.set(statsDailyRef, {
+                total: admin.firestore.FieldValue.increment(1),
+                countries: {
+                    [country]: admin.firestore.FieldValue.increment(1)
+                }
+            }, { merge: true });
         });
-        const nextMidnight = new Date();
-        nextMidnight.setUTCHours(24, 0, 0, 0);
-        const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
-        await Promise.all([
-            ipDocRef.set({ expiresAt }, { merge: true }),
-            sessionDocRef.set({ expiresAt }, { merge: true })
-        ]).catch(() => { });
         return { ok: true };
     }
     catch (err) {

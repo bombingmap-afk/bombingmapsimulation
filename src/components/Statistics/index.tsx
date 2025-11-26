@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { functions } from "../../config/firebase";
 import { httpsCallable } from "firebase/functions";
@@ -91,21 +91,21 @@ export default function Statistics({ country }: { country?: string }) {
 
   const getBombStats = httpsCallable(functions, "getBombStats");
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data } = await getBombStats({ days: 30, country: country });
+      const { data } = await getBombStats({ days: 30, country });
       setDailyData(data as DailyData);
     } catch (err) {
       console.error("Error loading analytics", err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [country]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   return (
     <div className="p-6 max-h-96 overflow-y-auto">

@@ -22,11 +22,11 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(0);
+  const [lastTimestamp, setLastTimestamp] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const getCountryMessagesFn = httpsCallable<
-    { country?: string; days: number; limit: number; offset: number },
+    { country?: string; limit?: number; lastTimestamp?: string },
     { messages: Message[]; total: number }
   >(functions, "getCountryMessages");
 
@@ -39,15 +39,17 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
     try {
       const { data } = await getCountryMessagesFn({
         country,
-        days: 1,
         limit: 10,
-        offset: 0,
       });
 
       const newMessages: Message[] = data.messages;
       setMessages(newMessages);
-      setOffset(newMessages.length);
-      setHasMore(newMessages.length < data.total ? true : false);
+      setLastTimestamp(
+        newMessages.length > 0
+          ? newMessages[newMessages.length - 1].timestamp
+          : null
+      );
+      setHasMore(newMessages.length < data.total);
     } catch (err) {
       console.error("Error loading messages:", err);
     } finally {
@@ -56,20 +58,27 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
   };
 
   const loadMoreMessages = async () => {
-    if (!hasMore || isLoading) return;
+    if (!hasMore || isLoading || !lastTimestamp) return;
 
     setIsLoading(true);
     try {
       const { data } = await getCountryMessagesFn({
-        days: 1,
+        country,
         limit: 10,
-        offset,
+        lastTimestamp,
       });
 
       const newMessages: Message[] = data.messages;
       setMessages((prev) => [...prev, ...newMessages]);
-      setOffset(offset + newMessages.length);
-      setHasMore(offset + newMessages.length < data.total);
+      setLastTimestamp(
+        newMessages.length > 0
+          ? newMessages[newMessages.length - 1].timestamp
+          : lastTimestamp
+      );
+      setHasMore(
+        newMessages.length > 0 &&
+          messages.length + newMessages.length < data.total
+      );
     } catch (err) {
       console.error("Error loading more messages:", err);
     } finally {
@@ -79,11 +88,12 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
-
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-
-    if (isNearBottom && hasMore && !isLoading) {
+    if (
+      scrollTop + clientHeight >= scrollHeight - 100 &&
+      hasMore &&
+      !isLoading
+    ) {
       loadMoreMessages();
     }
   };

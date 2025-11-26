@@ -36,15 +36,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCountryBombStats = void 0;
 const functions = __importStar(require("firebase-functions"));
 const firebase_1 = require("./firebase");
+// ---- Cache in-memory (per Cloud Function instance) ----
+let statsCache = null;
+// Cache duration in milliseconds
+const CACHE_DURATION = 5000; // 5 seconds
 exports.getCountryBombStats = functions.https.onCall(async (data, context) => {
     const { days } = data || {};
     if (!days || typeof days !== "number" || days <= 0) {
         throw new functions.https.HttpsError("invalid-argument", "'days' must be a positive number.");
     }
+    const now = Date.now();
+    // ---- Serve from cache if still valid ----
+    if (statsCache &&
+        statsCache.days === days &&
+        now - statsCache.timestamp < CACHE_DURATION) {
+        console.log("getCountryBombStats → CACHE HIT");
+        return statsCache.data;
+    }
+    console.log("getCountryBombStats → CACHE MISS → querying Firestore");
+    // ---- Compute fresh data ----
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
-    // Firestore query
     const snapshot = await firebase_1.db
         .collection("bombs")
         .where("timestamp", ">=", startDate)
@@ -58,10 +71,14 @@ exports.getCountryBombStats = functions.https.onCall(async (data, context) => {
             return;
         countryCounts[c] = (countryCounts[c] || 0) + 1;
     });
-    const total = Object.values(countryCounts).reduce((sum, n) => sum + n, 0);
-    return {
-        countryCounts,
-        total,
+    const total = Object.values(countryCounts).reduce((sum, count) => sum + count, 0);
+    const response = { countryCounts, total };
+    // ---- Save to cache ----
+    statsCache = {
+        timestamp: now,
+        days,
+        data: response,
     };
+    return response;
 });
 //# sourceMappingURL=getCountryBombStats.js.map

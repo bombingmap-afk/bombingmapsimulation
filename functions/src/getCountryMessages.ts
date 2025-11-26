@@ -14,22 +14,15 @@ interface Message {
 
 export const getCountryMessages = functions.https.onCall(
   async (
-    data: { country?: string; days?: number; limit?: number; offset?: number },
+    data: { country?: string; limit?: number; lastTimestamp?: string },
     context
   ) => {
-    const { country, days = 1, limit = 10, offset = 0 } = data || {};
+    const { country, limit = 10, lastTimestamp } = data || {};
 
     if (country && typeof country !== "string") {
       throw new functions.https.HttpsError(
         "invalid-argument",
         "'country' must be a string if provided"
-      );
-    }
-
-    if (typeof days !== "number" || days <= 0) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "'days' must be a positive number"
       );
     }
 
@@ -40,58 +33,54 @@ export const getCountryMessages = functions.https.onCall(
       );
     }
 
-    if (typeof offset !== "number" || offset < 0) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "'offset' must be >= 0"
-      );
-    }
-
     const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - days);
+    const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
 
     try {
       let queryRef = db
         .collection("bombs")
         .where("timestamp", ">=", startDate)
         .where("timestamp", "<=", endDate)
-        .orderBy("timestamp", "desc");
+        .orderBy("timestamp", "desc")
+        .limit(limit);
 
-      if (country && country.trim() !== "") {
+      if (country?.trim()) {
         queryRef = queryRef.where("country", "==", country.trim());
       }
 
-      const querySnapshot = await queryRef.offset(offset).limit(limit).get();
+      // Pagination par curseur
+      if (lastTimestamp) {
+        const lastDate = new Date(lastTimestamp);
+        queryRef = queryRef.startAfter(lastDate);
+      }
+
+      const querySnapshot = await queryRef.get();
 
       const messages: Message[] = querySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
-            id: doc.id,
-            ...data,
-            timestamp: data.timestamp.toDate().toISOString(),
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp.toDate().toISOString(),
         } as Message;
-        });
+      });
 
-      // Pour le front, on renvoie aussi le total correspondant au filtre
       let total = querySnapshot.size;
-      if (offset === 0) {
-        // Si c’est la première page, on fait une requête séparée pour le total
+      if (!lastTimestamp) {
         let totalQueryRef = db
           .collection("bombs")
           .where("timestamp", ">=", startDate)
           .where("timestamp", "<=", endDate);
-        if (country && country.trim() !== "") {
+
+        if (country?.trim()) {
           totalQueryRef = totalQueryRef.where("country", "==", country.trim());
         }
+
         const totalSnapshot = await totalQueryRef.get();
         total = totalSnapshot.size;
       }
 
-      return {
-        messages,
-        total,
-      };
+      return { messages, total };
     } catch (err) {
       console.error("getCountryMessages error:", err);
       throw new functions.https.HttpsError(

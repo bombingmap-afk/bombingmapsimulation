@@ -36,7 +36,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBombStats = void 0;
 const functions = __importStar(require("firebase-functions"));
 const firebase_1 = require("./firebase");
+let bombStatsCache = null;
+const CACHE_TTL_MS = 5000;
 exports.getBombStats = functions.https.onCall(async (data, context) => {
+    var _a, _b;
     const { days, country } = data || {};
     if (!days || typeof days !== "number" || days <= 0) {
         throw new functions.https.HttpsError("invalid-argument", "'days' must be a positive number.");
@@ -44,49 +47,47 @@ exports.getBombStats = functions.https.onCall(async (data, context) => {
     if (country && typeof country !== "string") {
         throw new functions.https.HttpsError("invalid-argument", "'country' must be a string if provided.");
     }
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    let query = firebase_1.db.collection("bombs")
-        .where("timestamp", ">=", startDate)
-        .where("timestamp", "<=", endDate);
-    if (country && typeof country === "string" && country.trim() !== "") {
-        query = query.where("country", "==", country.trim());
+    const key = `${days}_${country || "ALL"}`;
+    const now = Date.now();
+    if (bombStatsCache && bombStatsCache.key === key) {
+        if (now - bombStatsCache.timestamp < CACHE_TTL_MS) {
+            return bombStatsCache.result;
+        }
     }
-    const snapshot = await query.get();
-    if (snapshot.empty) {
-        return {
-            daily: [],
-            total: 0,
-            average: 0,
-            record: { date: null, count: 0 }
-        };
-    }
-    const dayCounts = {};
-    snapshot.forEach(doc => {
-        const ts = doc.data().timestamp.toDate();
-        const day = ts.toISOString().split("T")[0];
-        dayCounts[day] = (dayCounts[day] || 0) + 1;
-    });
+    const today = new Date();
     const daily = [];
-    let loop = new Date(startDate);
-    while (loop <= endDate) {
-        const dateStr = loop.toISOString().split("T")[0];
-        daily.push({
-            date: dateStr,
-            count: dayCounts[dateStr] || 0
-        });
-        loop.setDate(loop.getDate() + 1);
+    let total = 0;
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dayStr = d.toISOString().split("T")[0];
+        const doc = await firebase_1.db.collection("stats_daily").doc(dayStr).get();
+        let count = 0;
+        if (doc.exists) {
+            const data = doc.data() || {};
+            if (country && country.trim() !== "") {
+                count = (((_a = data.countries) === null || _a === void 0 ? void 0 : _a[country.trim()]) || 0);
+            }
+            else {
+                count = (data.total || 0);
+            }
+        }
+        daily.push({ date: dayStr, count });
+        total += count;
     }
-    daily.sort((a, b) => a.date.localeCompare(b.date));
-    const total = daily.reduce((sum, d) => sum + d.count, 0);
     const average = daily.length > 0 ? total / daily.length : 0;
-    const record = daily.reduce((max, d) => d.count > max.count ? d : max);
-    return {
+    const record = daily.reduce((max, d) => (d.count > max.count ? d : max), { date: ((_b = daily[0]) === null || _b === void 0 ? void 0 : _b.date) || null, count: 0 });
+    const result = {
         total,
         average,
         record,
         daily,
     };
+    bombStatsCache = {
+        timestamp: now,
+        key,
+        result,
+    };
+    return result;
 });
 //# sourceMappingURL=getBombStats.js.map

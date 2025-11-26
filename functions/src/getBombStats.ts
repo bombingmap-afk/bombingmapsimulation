@@ -2,9 +2,16 @@ import * as functions from "firebase-functions";
 
 import { db } from "./firebase";
 
+let bombStatsCache: {
+  timestamp: number;
+  key: string;       
+  result: any;
+} | null = null;
+
+const CACHE_TTL_MS = 5000; 
+
 export const getBombStats = functions.https.onCall(
   async (data: { days: number; country?: string }, context) => {
-
     const { days, country } = data || {};
 
     if (!days || typeof days !== "number" || days <= 0) {
@@ -21,61 +28,61 @@ export const getBombStats = functions.https.onCall(
       );
     }
 
-    const endDate = new Date(); 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const key = `${days}_${country || "ALL"}`;
+    const now = Date.now();
 
-    let query = db.collection("bombs")
-      .where("timestamp", ">=", startDate)
-      .where("timestamp", "<=", endDate);
-
-    if (country && typeof country === "string" && country.trim() !== "") {
-      query = query.where("country", "==", country.trim());
+    if (bombStatsCache && bombStatsCache.key === key) {
+      if (now - bombStatsCache.timestamp < CACHE_TTL_MS) {
+        return bombStatsCache.result;
+      }
     }
 
-    const snapshot = await query.get();
-
-    if (snapshot.empty) {
-      return {
-        daily: [],
-        total: 0,
-        average: 0,
-        record: { date: null, count: 0 }
-      };
-    }
-
-    const dayCounts: Record<string, number> = {};
-
-    snapshot.forEach(doc => {
-      const ts = doc.data().timestamp.toDate();
-      const day = ts.toISOString().split("T")[0];
-      dayCounts[day] = (dayCounts[day] || 0) + 1;
-    });
-
+    const today = new Date();
     const daily: Array<{ date: string; count: number }> = [];
 
-    let loop = new Date(startDate);
-    while (loop <= endDate) {
-      const dateStr = loop.toISOString().split("T")[0];
-      daily.push({
-        date: dateStr,
-        count: dayCounts[dateStr] || 0
-      });
-      loop.setDate(loop.getDate() + 1);
+    let total = 0;
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dayStr = d.toISOString().split("T")[0];
+
+      const doc = await db.collection("stats_daily").doc(dayStr).get();
+
+      let count = 0;
+      if (doc.exists) {
+        const data = doc.data() || {};
+
+        if (country && country.trim() !== "") {
+          count = (data.countries?.[country.trim()] || 0) as number;
+        } else {
+          count = (data.total || 0) as number;
+        }
+      }
+
+      daily.push({ date: dayStr, count });
+      total += count;
     }
 
-    daily.sort((a, b) => a.date.localeCompare(b.date));
-    const total = daily.reduce((sum, d) => sum + d.count, 0);
     const average = daily.length > 0 ? total / daily.length : 0;
     const record = daily.reduce(
-      (max, d) => d.count > max.count ? d : max
+      (max, d) => (d.count > max.count ? d : max),
+      { date: daily[0]?.date || null, count: 0 }
     );
 
-    return {
+    const result = {
       total,
       average,
       record,
       daily,
     };
+
+    bombStatsCache = {
+      timestamp: now,
+      key,
+      result,
+    };
+
+    return result;
   }
 );

@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import LegalDisclaimer from "./components/LegalDisclaimer";
 import MessagesSidebar from "./components/MessagesSidebar";
+import RefreshButton from "./components/RefreshButton";
 import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
@@ -32,6 +33,8 @@ function App() {
   const [showMessages, setShowMessages] = useState(false);
   const userCanBomb = canBombToday(userSession.lastBombDate);
   const [pendingBombs, setPendingBombs] = useState(new Map<string, number>());
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [cooldown, setCooldown] = useState(0); // en secondes
   const [bombCounts, setBombCounts] = useState({
     countryBombCounts: new Map<string, number>(),
     totalBombs: 0,
@@ -103,12 +106,15 @@ function App() {
 
   const getCountryBombStatsFn = httpsCallable(functions, "getCountryBombStats");
 
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
+  const refreshStats = async () => {
+    if (loadingStats || cooldown > 0) return;
 
-    const load = async () => {
+    setLoadingStats(true);
+
+    try {
       const { data } = await getCountryBombStatsFn({ days: 1 });
       const stats = data as any;
+
       const countryMap = new Map<string, number>(
         Object.entries(stats.countryCounts || {})
       );
@@ -120,13 +126,28 @@ function App() {
 
       setPendingBombs(new Map());
 
-      timeout = setTimeout(load, 3000);
-    };
+      setCooldown(5);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
-    load();
-
-    return () => clearTimeout(timeout);
+  useEffect(() => {
+    refreshStats();
   }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const interval = setInterval(() => {
+      setCooldown((c) => {
+        const next = c - 1;
+        return next > 0 ? next : 0;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   const effectiveBombCounts = new Map(bombCounts.countryBombCounts);
 
@@ -149,6 +170,11 @@ function App() {
         onShowRankings={() => setShowRankings(true)}
         onShowAnalytics={() => setShowAnalytics(true)}
         onShowMessages={() => setShowMessages(true)}
+      />
+      <RefreshButton
+        loading={loadingStats}
+        cooldown={cooldown}
+        onClick={refreshStats}
       />
 
       <main className="py-8">

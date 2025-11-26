@@ -92,6 +92,7 @@ export const dropBomb = functions.https.onCall(
 
     const ipDocRef = db.collection("ipCounters").doc(ipDocId);
     const sessionDocRef = db.collection("sessions").doc(sessionDocId);
+const statsDailyRef = db.collection("stats_daily").doc(getDayString());
     const bombsRef = db.collection("bombs").doc();
 
     try {
@@ -120,11 +121,16 @@ export const dropBomb = functions.https.onCall(
           }
         }
 
+        const nextMidnight = new Date();
+        nextMidnight.setUTCHours(24, 0, 0, 0);
+        const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
+
         tx.set(
           ipDocRef,
           {
             count: ipCount + 1,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt,
           },
           { merge: true }
         );
@@ -134,7 +140,8 @@ export const dropBomb = functions.https.onCall(
           sessionDocRef,
           {
             lastBombDate: nowIso,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt,
           },
           { merge: true }
         );
@@ -146,17 +153,18 @@ export const dropBomb = functions.https.onCall(
           source: source ?? null,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        tx.set(
+          statsDailyRef,
+          {
+            total: admin.firestore.FieldValue.increment(1),
+            countries: {
+              [country]: admin.firestore.FieldValue.increment(1)
+            }
+          },
+          { merge: true }
+        );
       });
-
-      const nextMidnight = new Date();
-      nextMidnight.setUTCHours(24, 0, 0, 0);
-
-      const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
-
-      await Promise.all([
-        ipDocRef.set({ expiresAt }, { merge: true }),
-        sessionDocRef.set({ expiresAt }, { merge: true })
-      ]).catch(() => {});
 
       return { ok: true };
     } catch (err: any) {

@@ -2,6 +2,19 @@ import * as functions from "firebase-functions";
 
 import { db } from "./firebase";
 
+// ---- Cache in-memory (per Cloud Function instance) ----
+let statsCache: {
+  timestamp: number;
+  days: number;
+  data: {
+    countryCounts: Record<string, number>;
+    total: number;
+  };
+} | null = null;
+
+// Cache duration in milliseconds
+const CACHE_DURATION = 5000; // 5 seconds
+
 export const getCountryBombStats = functions.https.onCall(
   async (data: { days: number }, context) => {
     const { days } = data || {};
@@ -13,11 +26,25 @@ export const getCountryBombStats = functions.https.onCall(
       );
     }
 
+    const now = Date.now();
+
+    // ---- Serve from cache if still valid ----
+    if (
+      statsCache &&
+      statsCache.days === days &&
+      now - statsCache.timestamp < CACHE_DURATION
+    ) {
+      console.log("getCountryBombStats → CACHE HIT");
+      return statsCache.data;
+    }
+
+    console.log("getCountryBombStats → CACHE MISS → querying Firestore");
+
+    // ---- Compute fresh data ----
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Firestore query
     const snapshot = await db
       .collection("bombs")
       .where("timestamp", ">=", startDate)
@@ -33,13 +60,19 @@ export const getCountryBombStats = functions.https.onCall(
     });
 
     const total = Object.values(countryCounts).reduce(
-      (sum, n) => sum + n,
+      (sum, count) => sum + count,
       0
     );
 
-    return {
-      countryCounts,
-      total,
+    const response = { countryCounts, total };
+
+    // ---- Save to cache ----
+    statsCache = {
+      timestamp: now,
+      days,
+      data: response,
     };
+
+    return response;
   }
 );

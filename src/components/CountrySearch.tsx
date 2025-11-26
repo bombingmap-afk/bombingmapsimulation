@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 
 import { flags } from "../utils/countryFlags";
@@ -13,8 +13,9 @@ const CountrySearch: React.FC<CountrySearchProps> = ({ onCountrySelect }) => {
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  const countries = Object.entries(flags).map(
-    ([country, flag]) => `${flag} ${country}`
+  const countries = useMemo(
+    () => Object.entries(flags).map(([country, flag]) => `${flag} ${country}`),
+    []
   );
 
   const searchRef = useRef<HTMLDivElement>(null);
