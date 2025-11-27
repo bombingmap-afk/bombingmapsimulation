@@ -61,7 +61,12 @@ function BombHistoryChart({ data }: BombHistoryChartProps) {
   return (
     <div className="bg-gray-700 rounded-xl p-6">
       <div className="w-full h-64">
-        <ResponsiveContainer>
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={0}
+          minHeight={0}
+        >
           <LineChart data={formattedData}>
             <CartesianGrid strokeOpacity={0.2} />
             <XAxis dataKey="shortDate" stroke="#ccc" />
@@ -109,51 +114,53 @@ export default function Statistics({ country }: { country?: string }) {
 
   return (
     <div className="p-6 max-h-96 overflow-y-auto">
-      {isLoading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-400">Loading statistics...</p>
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-white mb-2">
+            Bombing Evolution
+          </h3>
+          <p className="text-gray-400">Trend over the last 30 days</p>
         </div>
-      ) : !dailyData ? (
-        <div className="text-center py-8">
-          <p className="text-gray-400">
-            ⚠️ Error fetching bomb stats. Please try again.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="text-center">
-            <h3 className="text-xl font-bold text-white mb-2">
-              Bombing Evolution
-            </h3>
-            <p className="text-gray-400">Trend over the last 30 days</p>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-gray-400">Loading statistics...</p>
           </div>
-          <BombHistoryChart data={dailyData?.daily} />
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-2xl font-bold text-blue-400">
-                {dailyData?.total}
-              </div>
-              <div className="text-sm text-gray-400">Total Bombs</div>
-            </div>
-            <div className="bg-gray-700 rounded-lg py-4">
-              <div className="text-2xl font-bold text-green-400">
-                {Math.round((dailyData?.average ?? 0) * 100) / 100}
-              </div>
-              <div className="text-sm text-gray-400">Average per Day</div>
-            </div>
-            <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-2xl font-bold text-red-400 flex gap-2 justify-center items-end">
-                {dailyData?.record.count}
-                <span className="text-lg font-bold text-red-400">
-                  ({dailyData?.record.date})
-                </span>
-              </div>
-              <div className="text-sm text-gray-400">Daily Record</div>
-            </div>
+        ) : !dailyData ? (
+          <div className="text-center py-8">
+            <p className="text-gray-400">
+              ⚠️ Error fetching bomb stats. Please try again.
+            </p>
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            <BombHistoryChart data={dailyData?.daily} />
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-gray-700 rounded-lg p-4">
+                <div className="text-2xl font-bold text-blue-400">
+                  {dailyData?.total}
+                </div>
+                <div className="text-sm text-gray-400">Total Bombs</div>
+              </div>
+              <div className="bg-gray-700 rounded-lg py-4">
+                <div className="text-2xl font-bold text-green-400">
+                  {Math.round((dailyData?.average ?? 0) * 100) / 100}
+                </div>
+                <div className="text-sm text-gray-400">Average per Day</div>
+              </div>
+              <div className="bg-gray-700 rounded-lg p-4">
+                <div className="text-2xl font-bold text-red-400 flex gap-2 justify-center items-end">
+                  {dailyData?.record.count}
+                  <span className="text-lg font-bold text-red-400">
+                    ({dailyData?.record.date})
+                  </span>
+                </div>
+                <div className="text-sm text-gray-400">Daily Record</div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

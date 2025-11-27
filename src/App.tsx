@@ -1,3 +1,4 @@
+import toast, { Toaster } from "react-hot-toast";
 import { useEffect, useMemo, useState } from "react";
 
 import Analytics from "./components/Analytics";
@@ -11,7 +12,6 @@ import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
 import { httpsCallable } from "firebase/functions";
-import toast from "react-hot-toast";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 interface UserSession {
@@ -85,6 +85,8 @@ function App() {
           lastBombDate: new Date().toISOString(),
           totalBombs: userSession.totalBombs + 1,
         });
+        toast.success(`Bomb successfully sent to ${countryName}!`);
+        refreshStats();
       }
     } catch (error: any) {
       setPendingBombs((prev) => {
@@ -162,6 +164,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      <Toaster position="top-right" reverseOrder={false} />
       <LegalDisclaimer />
 
       <Header
@@ -182,7 +185,7 @@ function App() {
           <WorldMap
             userCanBomb={userCanBomb}
             onBomb={handleBomb}
-            countryBombCounts={bombCounts.countryBombCounts}
+            countryBombCounts={effectiveBombCounts}
             maxBombs={maxBombs}
           />
         </div>
