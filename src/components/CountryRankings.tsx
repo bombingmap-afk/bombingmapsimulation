@@ -38,11 +38,8 @@ interface CountryRanking {
 }
 
 const CountryRankingsContent: React.FC<{
-  rankings: CountryRanking[];
-  isLoading: boolean;
-}> = ({ rankings, isLoading }) => {
-  const maxBombCount = rankings.length > 0 ? rankings[0].bombCount : 0;
-
+  selectedDate: string;
+}> = ({ selectedDate }) => {
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
     if (rank === 2) return "text-gray-300";
@@ -87,6 +84,41 @@ const CountryRankingsContent: React.FC<{
     if (rank <= 10) return "bg-gradient-to-r from-orange-500 to-orange-700";
     return "bg-gradient-to-r from-gray-500 to-gray-700";
   };
+  const [rankings, setRankings] = useState<CountryRanking[]>([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getRankingsCF = httpsCallable<{ date: string }, RankingsResponse>(
+    functions,
+    "getRankings"
+  );
+
+  useEffect(() => {
+    loadRankings(selectedDate);
+  }, [selectedDate]);
+
+  const loadRankings = async (date: string) => {
+    setIsLoading(true);
+    try {
+      const result = await getRankingsCF({ date });
+      const trending = result.data.trending;
+      const rankingsWithTrend = trending.map((item) => ({
+        country: item.country,
+        bombCount: item.bombCount,
+        rank: item.todayRank,
+        change: item.change,
+        yesterdayRank: item.yesterdayRank,
+      }));
+      setRankings(rankingsWithTrend);
+    } catch (error) {
+      toast.error("Error loading rankings");
+      setRankings([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const maxBombCount = rankings.length > 0 ? rankings[0].bombCount : 0;
 
   return (
     <div className="p-6 max-h-96 overflow-y-auto">
@@ -304,41 +336,9 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [rankings, setRankings] = useState<CountryRanking[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [isLoading, setIsLoading] = useState(false);
-
-  const getRankingsCF = httpsCallable<{ date: string }, RankingsResponse>(
-    functions,
-    "getRankings"
-  );
-
-  useEffect(() => {
-    loadRankings(selectedDate);
-  }, [selectedDate]);
-
-  const loadRankings = async (date: string) => {
-    setIsLoading(true);
-    try {
-      const result = await getRankingsCF({ date });
-      const trending = result.data.trending;
-      const rankingsWithTrend = trending.map((item) => ({
-        country: item.country,
-        bombCount: item.bombCount,
-        rank: item.todayRank,
-        change: item.change,
-        yesterdayRank: item.yesterdayRank,
-      }));
-      setRankings(rankingsWithTrend);
-    } catch (error) {
-      toast.error("Error loading rankings");
-      setRankings([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -355,7 +355,7 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
             setSelectedDate={setSelectedDate}
           />
         </div>
-        <CountryRankingsContent rankings={rankings} isLoading={isLoading} />
+        <CountryRankingsContent selectedDate={selectedDate} />
       </div>
     </div>
   );
