@@ -102,8 +102,27 @@ const MessagesList: React.FC<MessagesListProps> = ({
     }
   };
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
+  const formatTime = (
+    timestamp: { _seconds: number; _nanoseconds: number } | number | string
+  ): string => {
+    let date: Date;
+
+    if (
+      typeof timestamp === "object" &&
+      "_seconds" in timestamp &&
+      "_nanoseconds" in timestamp
+    ) {
+      const ms =
+        timestamp._seconds * 1000 + Math.floor(timestamp._nanoseconds / 1e6);
+      date = new Date(ms);
+    } else if (typeof timestamp === "number") {
+      date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
+    } else {
+      date = new Date(timestamp);
+    }
+
+    if (isNaN(date.getTime())) return "Invalid date";
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -190,11 +209,6 @@ const MessagesList: React.FC<MessagesListProps> = ({
                     Attacker: {message.source}
                   </p>
                 )}
-                <div className="flex items-center justify-end mt-2">
-                  <span className="text-gray-500 text-xs">
-                    {formatTime(message.timestamp)}
-                  </span>
-                </div>
               </div>
             </div>
           ))}

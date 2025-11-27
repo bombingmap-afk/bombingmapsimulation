@@ -117,8 +117,6 @@ function App() {
       const { data } = await getCountryBombStatsFn();
       const stats = data as any;
 
-      console.log(stats);
-
       const countryMap = new Map<string, number>(
         Object.entries(stats.countryCounts || {})
       );
