@@ -36,79 +36,81 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRankings = void 0;
 const functions = __importStar(require("firebase-functions"));
 const firebase_1 = require("./firebase");
-exports.getRankings = functions.https.onCall(async (data, context) => {
+const cache = {};
+const CACHE_TTL_MS = 5000; // 5 secondes
+exports.getRankings = functions.https.onCall(async (data) => {
+    var _a, _b;
     const { date } = data || {};
-    // --- Validations ---
-    if (!date || typeof date !== "string") {
-        throw new functions.https.HttpsError("invalid-argument", "The 'date' field is required and must be a string (ISO format).");
+    if (!date)
+        throw new functions.https.HttpsError("invalid-argument", "'date' required");
+    const todayId = new Date(date).toISOString().split("T")[0];
+    const yesterdayDate = new Date(date);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayId = yesterdayDate.toISOString().split("T")[0];
+    const cacheKey = `${todayId}-${yesterdayId}`;
+    const now = Date.now();
+    // Retourne le cache si valide
+    if (cache[cacheKey] && now - cache[cacheKey].timestamp < CACHE_TTL_MS) {
+        return cache[cacheKey].data;
     }
-    // ---- Helpers ----
-    const getDateRange = (iso) => {
-        const start = new Date(iso);
-        const end = new Date(iso);
-        end.setDate(end.getDate() + 1);
-        return { start, end };
-    };
-    // ---- MODE 2: Trending ----
-    const d = new Date(date);
-    const dYesterday = new Date(date);
-    dYesterday.setDate(dYesterday.getDate() - 1);
-    const today = d.toISOString().split("T")[0];
-    const yesterday = dYesterday.toISOString().split("T")[0];
-    /**
-     * Récupère et retourne la liste triée [{ country, bombCount, rank }]
-     * en appliquant un classement qui donne le même rank en cas d'égalité.
-     *
-     * Ici j'implémente le "standard competition ranking" (1224).
-     */
-    const getRankings = async (day) => {
-        const { start, end } = getDateRange(day);
-        const snap = await firebase_1.db
-            .collection("bombs")
-            .where("timestamp", ">=", start)
-            .where("timestamp", "<", end)
-            .get();
-        const counts = {};
-        snap.forEach(doc => {
-            const c = doc.data().country;
-            counts[c] = (counts[c] || 0) + 1;
-        });
-        // array trié par bombCount descendant
-        const sorted = Object.entries(counts)
-            .map(([country, bombCount]) => ({ country, bombCount }))
+    // Lecture des docs stats_daily
+    const [todaySnap, yesterdaySnap] = await Promise.all([
+        firebase_1.db.collection("stats_daily").doc(todayId).get(),
+        firebase_1.db.collection("stats_daily").doc(yesterdayId).get(),
+    ]);
+    const todayData = ((_a = todaySnap.data()) === null || _a === void 0 ? void 0 : _a.countries) || {};
+    const yesterdayData = ((_b = yesterdaySnap.data()) === null || _b === void 0 ? void 0 : _b.countries) || {};
+    // --- Helper: calcule les ranks (standard competition) et renvoie sorted list + map ranks ---
+    const buildRanks = (data) => {
+        const sorted = Object.entries(data)
+            .map(([country, bombCount]) => ({ country, bombCount: bombCount }))
             .sort((a, b) => b.bombCount - a.bombCount);
-        // assignation de rangs avec gestion des égalités (standard competition ranking)
-        const result = [];
+        const ranks = new Map();
         let prevCount = null;
         let prevRank = 0;
         for (let i = 0; i < sorted.length; i++) {
             const item = sorted[i];
             if (prevCount !== null && item.bombCount === prevCount) {
-                // même bombCount => même rang que le précédent
-                result.push(Object.assign(Object.assign({}, item), { rank: prevRank }));
+                // egalité -> même rang que prevRank
+                ranks.set(item.country, prevRank);
             }
             else {
-                // différent => rang = position (i) + 1
                 const rank = i + 1;
                 prevRank = rank;
                 prevCount = item.bombCount;
-                result.push(Object.assign(Object.assign({}, item), { rank }));
+                ranks.set(item.country, rank);
             }
         }
-        return result;
+        return {
+            ranks,
+            sorted,
+        };
     };
-    const [todayR, yesterdayR] = await Promise.all([
-        getRankings(today),
-        getRankings(yesterday),
-    ]);
-    const yMap = new Map(yesterdayR.map(r => [r.country, r.rank]));
-    const trending = todayR.map(t => ({
-        country: t.country,
-        todayRank: t.rank,
-        yesterdayRank: yMap.get(t.country) || yesterdayR.length + 1,
-        change: (yMap.get(t.country) || yesterdayR.length + 1) - t.rank,
-        bombCount: t.bombCount,
-    }));
-    return { trending };
+    const { ranks: todayRanks, sorted: todaySorted } = buildRanks(todayData);
+    const { ranks: yesterdayRanks, sorted: yesterdaySorted } = buildRanks(yesterdayData);
+    // Si un pays était absent hier, on veut le considérer "dernier"
+    // mais "dernier" doit être relatif au nombre pertinent de pays -> on prend le max(len(today), len(yesterday))
+    const referenceCount = Math.max(todaySorted.length, yesterdaySorted.length);
+    const defaultYesterdayRank = referenceCount + 1;
+    // Construction du trending : itère sur la liste triée d'aujourd'hui (todaySorted)
+    const trending = todaySorted.map((t, idx) => {
+        var _a;
+        const country = t.country;
+        const todayRank = (_a = todayRanks.get(country)) !== null && _a !== void 0 ? _a : (idx + 1); // sécurité
+        const yesterdayRankRaw = yesterdayRanks.get(country);
+        const yesterdayRank = typeof yesterdayRankRaw === "number" ? yesterdayRankRaw : defaultYesterdayRank;
+        const change = yesterdayRank - todayRank; // positive => gained places (moved up)
+        return {
+            country,
+            todayRank,
+            yesterdayRank,
+            change,
+            bombCount: t.bombCount,
+        };
+    });
+    const returnData = { trending };
+    // Mise en cache
+    cache[cacheKey] = { timestamp: now, data: returnData };
+    return returnData;
 });
 //# sourceMappingURL=getRankings.js.map

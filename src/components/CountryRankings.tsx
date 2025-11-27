@@ -39,11 +39,9 @@ interface CountryRanking {
 
 const CountryRankingsContent: React.FC<{
   rankings: CountryRanking[];
-  selectedDate: string;
   isLoading: boolean;
-}> = ({ rankings, selectedDate, isLoading }) => {
+}> = ({ rankings, isLoading }) => {
   const maxBombCount = rankings.length > 0 ? rankings[0].bombCount : 0;
-  const isToday = selectedDate === new Date().toISOString().split("T")[0];
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
@@ -65,10 +63,9 @@ const CountryRankingsContent: React.FC<{
     return <Minus className="w-4 h-4 text-gray-400" />;
   };
 
-  const getTrendText = (change: number, yesterdayRank: number) => {
+  const getTrendText = (change: number) => {
     if (change > 0) return `+${change} places`;
     if (change < 0) return `${change} places`;
-    if (yesterdayRank > 200) return "New"; // If rank is very high, it's a new country
     return "Stable";
   };
 
@@ -129,16 +126,13 @@ const CountryRankingsContent: React.FC<{
                       </span>
                     </div>
                   </div>
-                  {isToday && country.change !== undefined && (
+                  {country.change !== undefined && (
                     <div className="flex items-center space-x-1">
                       {getTrendIcon(country.change)}
                       <span
                         className={`text-xs ${getTrendColor(country.change)}`}
                       >
-                        {getTrendText(
-                          country.change,
-                          country.yesterdayRank || 999
-                        )}
+                        {getTrendText(country.change)}
                       </span>
                     </div>
                   )}
@@ -361,11 +355,7 @@ const CountryRankingsWithCalls: React.FC<CountryRankingsProps> = ({
             setSelectedDate={setSelectedDate}
           />
         </div>
-        <CountryRankingsContent
-          rankings={rankings}
-          selectedDate={selectedDate}
-          isLoading={isLoading}
-        />
+        <CountryRankingsContent rankings={rankings} isLoading={isLoading} />
       </div>
     </div>
   );
