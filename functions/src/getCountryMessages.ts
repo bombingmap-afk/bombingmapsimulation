@@ -1,13 +1,12 @@
 import * as functions from "firebase-functions";
 
-import { Timestamp } from "firebase-admin/firestore";
 import { db } from "./firebase";
 
 interface Message {
   id: string;
   country: string;
   message: string;
-  timestamp: Timestamp;
+  timestamp: string;
   gifUrl?: string;
   source?: string;
 }
@@ -33,14 +32,8 @@ export const getCountryMessages = functions.https.onCall(
       );
     }
 
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
-
     try {
-      let queryRef = db
-        .collection("bombs")
-        .where("timestamp", ">=", startDate)
-        .where("timestamp", "<=", endDate)
+      let queryRef = db.collection("bombs")
         .orderBy("timestamp", "desc")
         .limit(limit);
 
@@ -48,10 +41,8 @@ export const getCountryMessages = functions.https.onCall(
         queryRef = queryRef.where("country", "==", country.trim());
       }
 
-      // Pagination par curseur
       if (lastTimestamp) {
-        const lastDate = new Date(lastTimestamp);
-        queryRef = queryRef.startAfter(lastDate);
+        queryRef = queryRef.startAfter(new Date(lastTimestamp));
       }
 
       const querySnapshot = await queryRef.get();
@@ -60,27 +51,15 @@ export const getCountryMessages = functions.https.onCall(
         const data = doc.data();
         return {
           id: doc.id,
-          ...data,
-          timestamp: data.timestamp.toDate().toISOString(),
-        } as Message;
+          country: data.country,
+          message: data.message,
+          timestamp: data.timestamp,
+          gifUrl: data.gifUrl ?? undefined,
+          source: data.source ?? undefined,
+        };
       });
 
-      let total = querySnapshot.size;
-      if (!lastTimestamp) {
-        let totalQueryRef = db
-          .collection("bombs")
-          .where("timestamp", ">=", startDate)
-          .where("timestamp", "<=", endDate);
-
-        if (country?.trim()) {
-          totalQueryRef = totalQueryRef.where("country", "==", country.trim());
-        }
-
-        const totalSnapshot = await totalQueryRef.get();
-        total = totalSnapshot.size;
-      }
-
-      return { messages, total };
+      return { messages };
     } catch (err) {
       console.error("getCountryMessages error:", err);
       throw new functions.https.HttpsError(

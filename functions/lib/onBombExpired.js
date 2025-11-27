@@ -33,32 +33,43 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCountryBombStats = void 0;
+exports.onBombExpired = void 0;
+const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions"));
 const firebase_1 = require("./firebase");
-// ---- Cache in-memory (per Cloud Function instance) ----
-let statsCache = null;
-const CACHE_DURATION = 2500;
-exports.getCountryBombStats = functions.https.onCall(async (data, context) => {
-    const now = Date.now();
-    if (statsCache && now - statsCache.timestamp < CACHE_DURATION) {
-        return statsCache.data;
-    }
-    const snapshot = await firebase_1.db
-        .collection("stats_24h")
-        .get();
-    const countryCounts = {};
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (!data.countries)
-            return;
-        Object.entries(data.countries).forEach(([country, count]) => {
-            countryCounts[country] = (countryCounts[country] || 0) + count;
+exports.onBombExpired = functions.firestore
+    .document("bombs/{bombId}")
+    .onDelete(async (snap, context) => {
+    var _a;
+    const data = snap.data();
+    if (!data)
+        return;
+    const bombId = context.params.bombId;
+    const country = data.country;
+    const bombDate = ((_a = data.timestamp) === null || _a === void 0 ? void 0 : _a.toDate)
+        ? data.timestamp.toDate()
+        : new Date(data.timestamp);
+    const dayId = bombDate.toISOString().split("T")[0];
+    const stats24hRef = firebase_1.db.collection("stats_24h").doc("counts");
+    const expiredRef = firebase_1.db
+        .collection("expired_bombs")
+        .doc(dayId)
+        .collection("items")
+        .doc(bombId);
+    try {
+        await firebase_1.db.runTransaction(async (tx) => {
+            tx.set(stats24hRef, {
+                total: admin.firestore.FieldValue.increment(-1),
+                countries: {
+                    [country]: admin.firestore.FieldValue.increment(-1),
+                },
+            }, { merge: true });
+            tx.set(expiredRef, Object.assign(Object.assign({}, data), { expiredAt: admin.firestore.FieldValue.serverTimestamp(), expiredDate: dayId }));
         });
-    });
-    const total = Object.values(countryCounts).reduce((sum, v) => sum + v, 0);
-    const response = { countryCounts, total };
-    statsCache = { timestamp: now, data: response };
-    return response;
+        console.log(`Bomb ${bombId} moved to expired_bombs/${dayId}`);
+    }
+    catch (err) {
+        console.error("Error in onBombExpired:", err);
+    }
 });
-//# sourceMappingURL=getCountryBombStats.js.map
+//# sourceMappingURL=onBombExpired.js.map

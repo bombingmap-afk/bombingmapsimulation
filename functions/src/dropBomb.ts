@@ -92,8 +92,9 @@ export const dropBomb = functions.https.onCall(
 
     const ipDocRef = db.collection("ipCounters").doc(ipDocId);
     const sessionDocRef = db.collection("sessions").doc(sessionDocId);
-const statsDailyRef = db.collection("stats_daily").doc(getDayString());
+    const statsDailyRef = db.collection("stats_daily").doc(getDayString());
     const bombsRef = db.collection("bombs").doc();
+    const stats24hRef = db.collection("stats_24h").doc("counts");
 
     try {
       await db.runTransaction(async (tx: FirebaseFirestore.Transaction) => {
@@ -124,6 +125,9 @@ const statsDailyRef = db.collection("stats_daily").doc(getDayString());
         const nextMidnight = new Date();
         nextMidnight.setUTCHours(24, 0, 0, 0);
         const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
+        const bombExpiresAt = admin.firestore.Timestamp.fromDate(
+          new Date(Date.now() + 24 * 60 * 60 * 1000)
+        )
 
         tx.set(
           ipDocRef,
@@ -152,6 +156,7 @@ const statsDailyRef = db.collection("stats_daily").doc(getDayString());
           gifUrl: gifUrl ?? null,
           source: source ?? null,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          expiresAt: bombExpiresAt
         });
 
         tx.set(
@@ -161,6 +166,17 @@ const statsDailyRef = db.collection("stats_daily").doc(getDayString());
             countries: {
               [country]: admin.firestore.FieldValue.increment(1)
             }
+          },
+          { merge: true }
+        );
+
+        tx.set(
+          stats24hRef,
+          {
+            total: admin.firestore.FieldValue.increment(1),
+            countries: {
+              [country]: admin.firestore.FieldValue.increment(1),
+            },
           },
           { merge: true }
         );

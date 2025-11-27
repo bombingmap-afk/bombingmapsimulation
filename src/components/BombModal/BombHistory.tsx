@@ -33,7 +33,7 @@ const BombHistory: React.FC<BombHistoryProps> = ({
         </div>
       </div>
       <div className="max-h-96 overflow-y-auto space-y-3">
-        <MessagesList country={countryName} />
+        <MessagesList country={countryName} nbTotalMessages={nbTodayBombs} />
       </div>
       <button
         onClick={onBack}

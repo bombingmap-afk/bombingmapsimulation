@@ -114,8 +114,10 @@ function App() {
     setLoadingStats(true);
 
     try {
-      const { data } = await getCountryBombStatsFn({ days: 1 });
+      const { data } = await getCountryBombStatsFn();
       const stats = data as any;
+
+      console.log(stats);
 
       const countryMap = new Map<string, number>(
         Object.entries(stats.countryCounts || {})
@@ -205,6 +207,7 @@ function App() {
 
       <MessagesSidebar
         isOpen={showMessages}
+        nbTotalMessages={bombCounts.totalBombs}
         onClose={() => setShowMessages(false)}
       />
     </div>

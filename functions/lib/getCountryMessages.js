@@ -44,41 +44,30 @@ exports.getCountryMessages = functions.https.onCall(async (data, context) => {
     if (typeof limit !== "number" || limit <= 0) {
         throw new functions.https.HttpsError("invalid-argument", "'limit' must be a positive number");
     }
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
     try {
-        let queryRef = firebase_1.db
-            .collection("bombs")
-            .where("timestamp", ">=", startDate)
-            .where("timestamp", "<=", endDate)
+        let queryRef = firebase_1.db.collection("bombs")
             .orderBy("timestamp", "desc")
             .limit(limit);
         if (country === null || country === void 0 ? void 0 : country.trim()) {
             queryRef = queryRef.where("country", "==", country.trim());
         }
-        // Pagination par curseur
         if (lastTimestamp) {
-            const lastDate = new Date(lastTimestamp);
-            queryRef = queryRef.startAfter(lastDate);
+            queryRef = queryRef.startAfter(new Date(lastTimestamp));
         }
         const querySnapshot = await queryRef.get();
         const messages = querySnapshot.docs.map((doc) => {
+            var _a, _b;
             const data = doc.data();
-            return Object.assign(Object.assign({ id: doc.id }, data), { timestamp: data.timestamp.toDate().toISOString() });
+            return {
+                id: doc.id,
+                country: data.country,
+                message: data.message,
+                timestamp: data.timestamp,
+                gifUrl: (_a = data.gifUrl) !== null && _a !== void 0 ? _a : undefined,
+                source: (_b = data.source) !== null && _b !== void 0 ? _b : undefined,
+            };
         });
-        let total = querySnapshot.size;
-        if (!lastTimestamp) {
-            let totalQueryRef = firebase_1.db
-                .collection("bombs")
-                .where("timestamp", ">=", startDate)
-                .where("timestamp", "<=", endDate);
-            if (country === null || country === void 0 ? void 0 : country.trim()) {
-                totalQueryRef = totalQueryRef.where("country", "==", country.trim());
-            }
-            const totalSnapshot = await totalQueryRef.get();
-            total = totalSnapshot.size;
-        }
-        return { messages, total };
+        return { messages };
     }
     catch (err) {
         console.error("getCountryMessages error:", err);

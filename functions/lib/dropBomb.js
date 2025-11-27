@@ -110,6 +110,7 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
     const sessionDocRef = firebase_1.db.collection("sessions").doc(sessionDocId);
     const statsDailyRef = firebase_1.db.collection("stats_daily").doc(getDayString());
     const bombsRef = firebase_1.db.collection("bombs").doc();
+    const stats24hRef = firebase_1.db.collection("stats_24h").doc("counts");
     try {
         await firebase_1.db.runTransaction(async (tx) => {
             var _a, _b, _c;
@@ -130,6 +131,7 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
             const nextMidnight = new Date();
             nextMidnight.setUTCHours(24, 0, 0, 0);
             const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
+            const bombExpiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
             tx.set(ipDocRef, {
                 count: ipCount + 1,
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -147,12 +149,19 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
                 gifUrl: gifUrl !== null && gifUrl !== void 0 ? gifUrl : null,
                 source: source !== null && source !== void 0 ? source : null,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                expiresAt: bombExpiresAt
             });
             tx.set(statsDailyRef, {
                 total: admin.firestore.FieldValue.increment(1),
                 countries: {
                     [country]: admin.firestore.FieldValue.increment(1)
                 }
+            }, { merge: true });
+            tx.set(stats24hRef, {
+                total: admin.firestore.FieldValue.increment(1),
+                countries: {
+                    [country]: admin.firestore.FieldValue.increment(1),
+                },
             }, { merge: true });
         });
         return { ok: true };

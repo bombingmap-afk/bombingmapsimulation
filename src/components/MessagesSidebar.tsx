@@ -5,11 +5,13 @@ import React from "react";
 
 interface MessagesSidebarProps {
   isOpen: boolean;
+  nbTotalMessages: number;
   onClose: () => void;
 }
 
 const MessagesSidebar: React.FC<MessagesSidebarProps> = ({
   isOpen,
+  nbTotalMessages,
   onClose,
 }) => {
   if (!isOpen) return null;
@@ -44,7 +46,7 @@ const MessagesSidebar: React.FC<MessagesSidebarProps> = ({
             Real-time messages from bombers worldwide
           </p>
         </div>
-        <MessagesList />
+        <MessagesList nbTotalMessages={nbTotalMessages} />
       </div>
     </>
   );

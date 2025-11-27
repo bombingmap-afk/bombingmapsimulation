@@ -16,9 +16,13 @@ interface Message {
 
 interface MessagesListProps {
   country?: string;
+  nbTotalMessages: number;
 }
 
-const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
+const MessagesList: React.FC<MessagesListProps> = ({
+  country,
+  nbTotalMessages,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -27,7 +31,7 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
 
   const getCountryMessagesFn = httpsCallable<
     { country?: string; limit?: number; lastTimestamp?: string },
-    { messages: Message[]; total: number }
+    { messages: Message[] }
   >(functions, "getCountryMessages");
 
   useEffect(() => {
@@ -49,7 +53,7 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
           ? newMessages[newMessages.length - 1].timestamp
           : null
       );
-      setHasMore(newMessages.length < data.total);
+      setHasMore(newMessages.length < nbTotalMessages);
     } catch (err) {
       console.error("Error loading messages:", err);
     } finally {
@@ -77,7 +81,7 @@ const MessagesList: React.FC<MessagesListProps> = ({ country }) => {
       );
       setHasMore(
         newMessages.length > 0 &&
-          messages.length + newMessages.length < data.total
+          messages.length + newMessages.length < nbTotalMessages
       );
     } catch (err) {
       console.error("Error loading more messages:", err);
