@@ -192,7 +192,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
                 </div>
               </div>
               <div className="bg-gray-800 rounded p-3">
-                <p className="text-gray-200 italic">"{message.message}"</p>
+                <p className="text-gray-200">"{message.message}"</p>
               </div>
               {message.gifUrl && (
                 <div className="mt-3 text-center">

@@ -1,6 +1,7 @@
 import { Bomb, Search, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
+import Picker from "emoji-picker-react";
 import { flags } from "../../utils/countryFlags";
 
 interface BombFormProps {
@@ -26,27 +27,53 @@ const Message: React.FC<{
   messageError: string;
   handleMessageChange: (_: string) => void;
 }> = ({ message, messageError, handleMessageChange }) => {
+  const [showPicker, setShowPicker] = useState(false);
+
+  const handleEmojiClick = (emojiObject: { emoji: string }) => {
+    handleMessageChange(message + emojiObject.emoji);
+  };
+
+  const handleEmojiChange = (value: string) => {
+    const emojiRegex = /\p{Extended_Pictographic}/gu;
+    const onlyEmojis = value.match(emojiRegex)?.join("") || "";
+    handleMessageChange(onlyEmojis);
+  };
+
   return (
-    <div>
+    <div className="relative">
       <label className="block text-white font-medium mb-2">
         Your Message ({message.length}/70) *
       </label>
-      <textarea
-        value={message}
-        onChange={(e) => handleMessageChange(e.target.value)}
-        placeholder="Leave a message (any illegal or harmful content will be removed)..."
-        rows={4}
-        className={`w-full py-3 px-4 bg-gray-700 text-white rounded-lg border resize-none
+      <div className="flex gap-2 items-center justify-center">
+        <input
+          value={message}
+          onChange={(e) => handleEmojiChange(e.target.value)}
+          placeholder="Only emojis allowed..."
+          className={`w-full py-3 px-4 bg-gray-700 text-white rounded-lg border resize-none
                       focus:ring-2 focus:ring-opacity-50 transition-colors
                       ${
                         messageError
                           ? "border-red-500 focus:ring-red-500"
                           : "border-gray-600 focus:ring-red-500"
                       }`}
-      />
+        />
+        <button
+          type="button"
+          onClick={() => setShowPicker(!showPicker)}
+          className="px-3 bg-blue-600 text-white rounded-lg"
+        >
+          😀 Emoji
+        </button>
+      </div>
+
+      {showPicker && (
+        <div className="absolute z-50 mt-2">
+          <Picker onEmojiClick={handleEmojiClick} />
+        </div>
+      )}
+
       <p className="text-gray-400 text-sm mt-2">
-        Messages promoting terrorism, pedophilia, or any other illegal or
-        harmful activity will be moderated and removed.
+        Only emojis are allowed in this message.
       </p>
       {messageError && (
         <p className="text-red-400 text-sm mt-2">⚠️ {messageError}</p>
