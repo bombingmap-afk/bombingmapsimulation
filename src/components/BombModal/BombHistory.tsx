@@ -32,9 +32,7 @@ const BombHistory: React.FC<BombHistoryProps> = ({
           </p>
         </div>
       </div>
-      <div className="max-h-96 overflow-y-auto space-y-3">
-        <MessagesList country={countryName} nbTotalMessages={nbTodayBombs} />
-      </div>
+      <MessagesList country={countryName} nbTotalMessages={nbTodayBombs} />
       <button
         onClick={onBack}
         className="w-full py-3 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg

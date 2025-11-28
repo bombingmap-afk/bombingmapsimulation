@@ -146,7 +146,9 @@ const MessagesList: React.FC<MessagesListProps> = ({
     <div
       ref={scrollRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto p-4 space-y-3"
+      className={`flex-1 overflow-y-auto p-4 space-y-3 ${
+        country && "max-h-96"
+      }`}
       style={{ height: "calc(100vh - 120px)" }}
     >
       {isLoading ? (
