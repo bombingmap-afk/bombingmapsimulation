@@ -28,7 +28,7 @@ const BombHistory: React.FC<BombHistoryProps> = ({
         <div className="bg-gray-700 rounded-lg p-3 mb-4">
           <p className="text-gray-300">
             <span className="text-red-400 font-bold">{nbTodayBombs}</span> bomb
-            {nbTodayBombs > 1 ? "s" : ""} dropped since the last 24 hours
+            {nbTodayBombs > 1 ? "s" : ""} in 24 hours
           </p>
         </div>
       </div>
