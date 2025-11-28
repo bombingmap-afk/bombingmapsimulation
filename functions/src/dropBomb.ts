@@ -81,9 +81,26 @@ export const dropBomb = functions.https.onCall(
       );
     }
 
+    const emojiRegex = /\p{Extended_Pictographic}/gu;
+
+    if (message.length > 70) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Message too long, max 70 characters"
+      );
+    }
+
+    const nonEmoji = message.replace(emojiRegex, "");
+    if (nonEmoji.length > 0) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Message must contain only emojis"
+      );
+    }
+
     // get client IP from rawRequest
     const rawReq = context.rawRequest as any;
-    const ip = getClientIp(rawReq); // ta fonction existante
+    const ip = getClientIp(rawReq); 
 
     // compute hashed ip (never store raw ip)
     const ipHash = MASTER_KEY ? hashIpForToday(ip, MASTER_KEY, 32) : "no_key_" + getDayString();
