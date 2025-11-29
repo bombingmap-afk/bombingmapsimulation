@@ -9,7 +9,7 @@ interface Message {
   id: string;
   country: string;
   message: string;
-  timestamp: string;
+  timestamp: number | null;
   gifUrl?: string;
   source?: string;
 }
@@ -26,11 +26,11 @@ const MessagesList: React.FC<MessagesListProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [lastTimestamp, setLastTimestamp] = useState<string | null>(null);
+  const [lastTimestamp, setLastTimestamp] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const getCountryMessagesFn = httpsCallable<
-    { country?: string; limit?: number; lastTimestamp?: string },
+    { country?: string; limit?: number; lastTimestamp?: number | null },
     { messages: Message[] }
   >(functions, "getCountryMessages");
 
@@ -50,7 +50,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
       setMessages(newMessages);
       setLastTimestamp(
         newMessages.length > 0
-          ? newMessages[newMessages.length - 1].timestamp
+          ? newMessages[newMessages.length - 1].timestamp // timestamp en millis
           : null
       );
       setHasMore(newMessages.length < nbTotalMessages);
@@ -69,20 +69,20 @@ const MessagesList: React.FC<MessagesListProps> = ({
       const { data } = await getCountryMessagesFn({
         country,
         limit: 10,
-        lastTimestamp,
+        lastTimestamp: lastTimestamp ?? undefined,
       });
 
-      const newMessages: Message[] = data.messages;
-      setMessages((prev) => [...prev, ...newMessages]);
-      setLastTimestamp(
-        newMessages.length > 0
-          ? newMessages[newMessages.length - 1].timestamp
-          : lastTimestamp
-      );
-      setHasMore(
-        newMessages.length > 0 &&
-          messages.length + newMessages.length < nbTotalMessages
-      );
+      const newMessages = data.messages;
+      setMessages((prev) => {
+        const merged = [...prev, ...newMessages];
+        setHasMore(merged.length < nbTotalMessages);
+
+        if (newMessages.length > 0) {
+          setLastTimestamp(newMessages[newMessages.length - 1].timestamp);
+        }
+
+        return merged;
+      });
     } catch (err) {
       console.error("Error loading more messages:", err);
     } finally {
@@ -102,24 +102,9 @@ const MessagesList: React.FC<MessagesListProps> = ({
     }
   };
 
-  const formatTime = (
-    timestamp: { _seconds: number; _nanoseconds: number } | number | string
-  ): string => {
+  const formatTime = (timestamp: number): string => {
     let date: Date;
-
-    if (
-      typeof timestamp === "object" &&
-      "_seconds" in timestamp &&
-      "_nanoseconds" in timestamp
-    ) {
-      const ms =
-        timestamp._seconds * 1000 + Math.floor(timestamp._nanoseconds / 1e6);
-      date = new Date(ms);
-    } else if (typeof timestamp === "number") {
-      date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
-    } else {
-      date = new Date(timestamp);
-    }
+    date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
 
     if (isNaN(date.getTime())) return "Invalid date";
 
@@ -151,7 +136,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
       }`}
       style={{ height: "calc(100vh - 120px)" }}
     >
-      {isLoading ? (
+      {isLoading && messages.length === 0 ? (
         <div className="text-center py-4">
           <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
           <p className="text-gray-400 text-sm">Loading messages...</p>
@@ -188,10 +173,12 @@ const MessagesList: React.FC<MessagesListProps> = ({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center space-x-1 text-gray-400 text-xs">
-                  <Clock className="w-3 h-3" />
-                  <span>{formatTime(message.timestamp)}</span>
-                </div>
+                {message.timestamp && (
+                  <div className="flex items-center space-x-1 text-gray-400 text-xs">
+                    <Clock className="w-3 h-3" />
+                    <span>{formatTime(message.timestamp)}</span>
+                  </div>
+                )}
               </div>
               <div className="bg-gray-800 rounded p-3">
                 <p className="text-gray-200">"{message.message}"</p>
@@ -214,6 +201,12 @@ const MessagesList: React.FC<MessagesListProps> = ({
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="text-center py-4">
+              <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+              <p className="text-gray-400 text-sm">Loading messages...</p>
+            </div>
+          )}
           {!hasMore && messages.length > 0 && (
             <div className="text-center py-4">
               <p className="text-gray-500 text-sm">

@@ -1,19 +1,11 @@
+import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
-import { db } from "./firebase";
-
-interface Message {
-  id: string;
-  country: string;
-  message: string;
-  timestamp: string;
-  gifUrl?: string;
-  source?: string;
-}
+import { db } from "./firebase"; // adapte selon ton import
 
 export const getCountryMessages = functions.https.onCall(
   async (
-    data: { country?: string; limit?: number; lastTimestamp?: string },
+    data: { country?: string; limit?: number; lastTimestamp?: number },
     context
   ) => {
     const { country, limit = 10, lastTimestamp } = data || {};
@@ -33,7 +25,8 @@ export const getCountryMessages = functions.https.onCall(
     }
 
     try {
-      let queryRef = db.collection("bombs")
+      let queryRef = db
+        .collection("bombs")
         .orderBy("timestamp", "desc")
         .limit(limit);
 
@@ -42,20 +35,21 @@ export const getCountryMessages = functions.https.onCall(
       }
 
       if (lastTimestamp) {
-        queryRef = queryRef.startAfter(new Date(lastTimestamp));
+        const cursor = admin.firestore.Timestamp.fromMillis(lastTimestamp);
+        queryRef = queryRef.startAfter(cursor);
       }
 
       const querySnapshot = await queryRef.get();
 
-      const messages: Message[] = querySnapshot.docs.map((doc) => {
+      const messages = querySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           id: doc.id,
           country: data.country,
           message: data.message,
-          timestamp: data.timestamp,
           gifUrl: data.gifUrl ?? undefined,
           source: data.source ?? undefined,
+          timestamp: data.timestamp.toMillis(),
         };
       });
 
