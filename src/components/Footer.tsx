@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="border-t border-gray-700 mt-8 pt-6 text-center">
           <p className="text-gray-400 text-sm mb-2">
-            World Bomb Map - Virtual Social Experiment © 2024
+            World Bomb Map - Virtual Social Experiment © 2025
           </p>
           <p className="text-xs text-gray-500">
             This platform is designed for educational research on digital

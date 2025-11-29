@@ -64,6 +64,9 @@ function App() {
       toast.error("You already bombed today!");
       return;
     }
+    toast.success(
+      "Your bomb request is being reviewed by a committee of overpaid politicians."
+    );
 
     setPendingBombs((prev) => {
       const updated = new Map(prev);
@@ -85,7 +88,9 @@ function App() {
           lastBombDate: new Date().toISOString(),
           totalBombs: userSession.totalBombs + 1,
         });
-        toast.success(`Bomb successfully sent to ${countryName}!`);
+        toast.success(
+          `Request accepted! Bomb successfully sent to ${countryName}!`
+        );
         refreshStats();
       }
     } catch (error: any) {
@@ -96,9 +101,9 @@ function App() {
         else updated.set(countryName, current - 1);
         return updated;
       });
-      if (error.code === "already-exists") {
+      if (error.code === "functions/already-exists") {
         toast.error("You already bombed today!");
-      } else if (error.code === "resource-exhausted") {
+      } else if (error.code === "functions/resource-exhausted") {
         toast.error("Your IP has reached the daily limit.");
       } else {
         toast.error("An error occurred while sending your bomb.");

@@ -77,12 +77,9 @@ export const dropBomb = functions.https.onCall(
     if (!country || !message || !sessionId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing required fields (country, message, sessionId)."
+        "Missing required fields"
       );
     }
-
-    const emojiRegex = /\p{Extended_Pictographic}/gu;
-
     if (message.length > 70) {
       throw new functions.https.HttpsError(
         "invalid-argument",
@@ -90,11 +87,13 @@ export const dropBomb = functions.https.onCall(
       );
     }
 
-    const nonEmoji = message.replace(emojiRegex, "");
-    if (nonEmoji.length > 0) {
+    const emojiOnlyRegex =
+      /(?:\p{Extended_Pictographic}(?:\p{Emoji_Modifier}|\uFE0F|\u200D\p{Extended_Pictographic})*)+/gu;
+
+    if (!emojiOnlyRegex.test(message)) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Message must contain only emojis"
+        "Message can only contain emojis."
       );
     }
 

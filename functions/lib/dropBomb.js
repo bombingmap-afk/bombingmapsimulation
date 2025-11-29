@@ -99,13 +99,12 @@ exports.dropBomb = functions.https.onCall(async (data, context) => {
     if (!country || !message || !sessionId) {
         throw new functions.https.HttpsError("invalid-argument", "Missing required fields (country, message, sessionId).");
     }
-    const emojiRegex = /\p{Extended_Pictographic}/gu;
     if (message.length > 70) {
         throw new functions.https.HttpsError("invalid-argument", "Message too long, max 70 characters");
     }
-    const nonEmoji = message.replace(emojiRegex, "");
-    if (nonEmoji.length > 0) {
-        throw new functions.https.HttpsError("invalid-argument", "Message must contain only emojis");
+    const emojiOnlyRegex = /(?:\p{Extended_Pictographic}(?:\p{Emoji_Modifier}|\uFE0F|\u200D\p{Extended_Pictographic})*)+/gu;
+    if (!emojiOnlyRegex.test(message)) {
+        throw new functions.https.HttpsError("invalid-argument", "Message can only contain emojis.");
     }
     // get client IP from rawRequest
     const rawReq = context.rawRequest;
