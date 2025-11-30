@@ -13,10 +13,7 @@ const CountrySearch: React.FC<CountrySearchProps> = ({ onCountrySelect }) => {
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
-  const countries = useMemo(
-    () => Object.entries(flags).map(([country, flag]) => `${flag} ${country}`),
-    []
-  );
+  const countries = useMemo(() => Object.keys(flags), []);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -127,7 +124,7 @@ const CountrySearch: React.FC<CountrySearchProps> = ({ onCountrySelect }) => {
                 index === selectedIndex ? "bg-gray-700" : ""
               }`}
             >
-              {country}
+              {flags[country]} {country}
             </button>
           ))}
         </div>

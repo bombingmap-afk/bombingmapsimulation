@@ -28,9 +28,13 @@ const Message: React.FC<{
   handleMessageChange: (_: string) => void;
 }> = ({ message, messageError, handleMessageChange }) => {
   const [showPicker, setShowPicker] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEmojiClick = (emojiObject: { emoji: string }) => {
-    handleMessageChange(message + emojiObject.emoji);
+    const current = inputRef.current?.value || "";
+    const newValue = current + emojiObject.emoji;
+
+    handleMessageChange(newValue);
   };
 
   const handleEmojiChange = (value: string) => {
@@ -46,6 +50,7 @@ const Message: React.FC<{
       </label>
       <div className="flex gap-2 items-center justify-center">
         <input
+          ref={inputRef}
           value={message}
           onChange={(e) => handleEmojiChange(e.target.value)}
           placeholder="Only emojis allowed..."

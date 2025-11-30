@@ -97,7 +97,7 @@ function getClientIp(rawRequest) {
 exports.dropBomb = functions.https.onCall(async (data, context) => {
     const { country, message, sessionId, gifUrl, source } = data || {};
     if (!country || !message || !sessionId) {
-        throw new functions.https.HttpsError("invalid-argument", "Missing required fields (country, message, sessionId).");
+        throw new functions.https.HttpsError("invalid-argument", "Missing required fields");
     }
     if (message.length > 70) {
         throw new functions.https.HttpsError("invalid-argument", "Message too long, max 70 characters");
