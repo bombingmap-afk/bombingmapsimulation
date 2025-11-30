@@ -19,5 +19,5 @@ __exportStar(require("./getBombStats"), exports);
 __exportStar(require("./dropBomb"), exports);
 __exportStar(require("./getCountryBombStats"), exports);
 __exportStar(require("./getCountryMessages"), exports);
-__exportStar(require("./onBombExpired"), exports);
+__exportStar(require("./expireBombsBatch"), exports);
 //# sourceMappingURL=index.js.map
