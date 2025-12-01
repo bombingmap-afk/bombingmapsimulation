@@ -44,7 +44,7 @@ export async function expireBombsLogic() {
   const statsRef = db.collection("stats_24h").doc("counts");
   const statsUpdate: any = { total: admin.firestore.FieldValue.increment(-expiredSnapshot.size) };
   for (const country in countryCounts) {
-    statsUpdate[country] = admin.firestore.FieldValue.increment(-countryCounts[country]);
+    statsUpdate[`countries.${country}`] = admin.firestore.FieldValue.increment(-countryCounts[country]);
   }
   batch.set(statsRef, statsUpdate, { merge: true });
 
