@@ -12,6 +12,8 @@ interface BombModalProps {
   onBomb: (message: string, gifUrl?: string, source?: string) => void;
   onClose: () => void;
   nbTodayBombs: number;
+  turnstileToken: string | null;
+  setTurnstileToken: (_: string | null) => void;
 }
 
 const BombModal: React.FC<BombModalProps> = ({
@@ -20,6 +22,8 @@ const BombModal: React.FC<BombModalProps> = ({
   onBomb,
   onClose,
   nbTodayBombs,
+  turnstileToken,
+  setTurnstileToken,
 }) => {
   const [mode, setMode] = useState<"choice" | "bomb" | "history" | "stats">(
     "choice"
@@ -97,6 +101,8 @@ const BombModal: React.FC<BombModalProps> = ({
               countryName={countryName}
               onBomb={handleBomb}
               onBack={handleBack}
+              turnstileToken={turnstileToken}
+              setTurnstileToken={setTurnstileToken}
             />
           )}
           {mode === "history" && (

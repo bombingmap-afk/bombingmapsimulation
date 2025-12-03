@@ -2,10 +2,13 @@ import { Bomb, Search, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import Picker from "emoji-picker-react";
+import TurnstileWidget from "../TurnstileWidget";
 import { flags } from "../../utils/countryFlags";
 
 interface BombFormProps {
   countryName: string;
+  turnstileToken: string | null;
+  setTurnstileToken: (_: string | null) => void;
   onBomb: (message: string, gifUrl?: string, source?: string) => void;
   onBack: () => void;
 }
@@ -133,7 +136,13 @@ const GIF: React.FC<{
   );
 };
 
-const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
+const BombForm: React.FC<BombFormProps> = ({
+  countryName,
+  turnstileToken,
+  setTurnstileToken,
+  onBomb,
+  onBack,
+}) => {
   const [message, setMessage] = useState("");
   const [gifUrl, setGifUrl] = useState("");
   const [source, setSource] = useState("");
@@ -142,6 +151,7 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
+  const [turnstileTokenError, setTurnstileTokenError] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -182,6 +192,9 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
     if (!isValidGifUrl(gifUrl)) {
       setGifError("The GIF link must come from giphy.com");
       hasError = true;
+    }
+    if (!turnstileToken) {
+      setTurnstileTokenError("Please complete the verification above");
     }
     if (hasError) return;
 
@@ -313,6 +326,13 @@ const BombForm: React.FC<BombFormProps> = ({ countryName, onBomb, onBack }) => {
           )}
         </div>
       </div>
+      <TurnstileWidget
+        onVerify={setTurnstileToken}
+        onError={() => setTurnstileToken(null)}
+      />
+      {turnstileTokenError && (
+        <p className="text-red-400 text-sm mt-2">⚠️ {turnstileTokenError}</p>
+      )}
       <div className="flex space-x-3">
         <button
           onClick={onBack}

@@ -27,7 +27,7 @@ function App() {
       totalBombs: 0,
     }
   );
-
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showRankings, setShowRankings] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -46,6 +46,7 @@ function App() {
       sessionId: string;
       gifUrl: string | null;
       source: string | null;
+      turnstileToken: string | null;
     },
     { ok: boolean }
   >(functions, "dropBomb");
@@ -81,6 +82,7 @@ function App() {
         sessionId,
         gifUrl: gifUrl || null,
         source: source || null,
+        turnstileToken,
       });
 
       if (result.data?.ok) {
@@ -92,6 +94,7 @@ function App() {
           `Request accepted! Bomb successfully sent to ${countryName}!`
         );
         refreshStats();
+        setTurnstileToken(null);
       }
     } catch (error: any) {
       setPendingBombs((prev) => {
@@ -192,6 +195,8 @@ function App() {
             onBomb={handleBomb}
             countryBombCounts={effectiveBombCounts}
             maxBombs={maxBombs}
+            turnstileToken={turnstileToken}
+            setTurnstileToken={setTurnstileToken}
           />
         </div>
       </main>

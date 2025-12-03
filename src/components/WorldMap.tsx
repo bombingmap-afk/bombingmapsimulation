@@ -22,6 +22,8 @@ interface WorldMapProps {
   ) => void;
   countryBombCounts: Map<string, number>;
   maxBombs: number;
+  turnstileToken: string | null;
+  setTurnstileToken: (_: string | null) => void;
 }
 
 const microStates = [
@@ -120,6 +122,8 @@ const WorldMap: React.FC<WorldMapProps> = ({
   onBomb,
   countryBombCounts,
   maxBombs,
+  turnstileToken,
+  setTurnstileToken,
 }) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -280,6 +284,8 @@ const WorldMap: React.FC<WorldMapProps> = ({
           onBomb={handleBomb}
           onClose={handleCloseModal}
           nbTodayBombs={countryBombCounts.get(selectedCountry) ?? 0}
+          turnstileToken={turnstileToken}
+          setTurnstileToken={setTurnstileToken}
         />
       )}
     </div>
