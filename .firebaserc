@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "bombingmap"
+    "default": "bombingmap-dev",
+    "dev": "bombingmap-dev",
+    "prod": "bombingmap"
   }
 }
