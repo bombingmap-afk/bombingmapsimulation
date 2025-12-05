@@ -7,10 +7,12 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import LegalDisclaimer from "./components/LegalDisclaimer";
 import MessagesSidebar from "./components/MessagesSidebar";
+import NewsFlash from "./components/NewsFlash";
 import RefreshButton from "./components/RefreshButton";
 import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
+import { getRandomNews } from "./utils/newsFlashes";
 import { httpsCallable } from "firebase/functions";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
@@ -34,11 +36,14 @@ function App() {
   const userCanBomb = canBombToday(userSession.lastBombDate);
   const [pendingBombs, setPendingBombs] = useState(new Map<string, number>());
   const [loadingStats, setLoadingStats] = useState(false);
-  const [cooldown, setCooldown] = useState(0); // en secondes
+  const [cooldown, setCooldown] = useState(0);
+  const [currentNews, setCurrentNews] = useState<string | null>(null);
+
   const [bombCounts, setBombCounts] = useState({
     countryBombCounts: new Map<string, number>(),
     totalBombs: 0,
   });
+
   const dropBomb = httpsCallable<
     {
       country: string;
@@ -65,6 +70,7 @@ function App() {
       toast.error("You already bombed today!");
       return;
     }
+
     toast.success(
       "Your bomb request is being reviewed by a committee of overpaid politicians."
     );
@@ -90,9 +96,14 @@ function App() {
           lastBombDate: new Date().toISOString(),
           totalBombs: userSession.totalBombs + 1,
         });
+
         toast.success(
           `Request accepted! Bomb successfully sent to ${countryName}!`
         );
+
+        const newsMessage = getRandomNews(countryName);
+        setCurrentNews(newsMessage ? `${countryName}: ${newsMessage}` : null);
+
         refreshStats();
         setTurnstileToken(null);
       }
@@ -104,6 +115,7 @@ function App() {
         else updated.set(countryName, current - 1);
         return updated;
       });
+
       if (error.code === "functions/already-exists") {
         toast.error("You already bombed today!");
       } else if (error.code === "functions/resource-exhausted") {
@@ -135,7 +147,6 @@ function App() {
       });
 
       setPendingBombs(new Map());
-
       setCooldown(5);
     } finally {
       setLoadingStats(false);
@@ -174,7 +185,13 @@ function App() {
     <div className="min-h-screen bg-gray-900">
       <Toaster position="top-right" reverseOrder={false} />
       <LegalDisclaimer />
-
+      {currentNews && (
+        <NewsFlash
+          message={currentNews}
+          onClose={() => setCurrentNews(null)}
+          duration={8000}
+        />
+      )}
       <Header
         totalBombs={bombCounts.totalBombs}
         userCanBomb={userCanBomb}
@@ -184,10 +201,10 @@ function App() {
       />
       <RefreshButton
         loading={loadingStats}
+        currentNews={currentNews}
         cooldown={cooldown}
         onClick={refreshStats}
       />
-
       <main className="py-8">
         <div className="max-w-7xl mx-auto">
           <WorldMap
@@ -200,19 +217,15 @@ function App() {
           />
         </div>
       </main>
-
       <Footer />
-
       <CountryRankingsWithCalls
         isOpen={showRankings}
         onClose={() => setShowRankings(false)}
       />
-
       <Analytics
         isOpen={showAnalytics}
         onClose={() => setShowAnalytics(false)}
       />
-
       <MessagesSidebar
         isOpen={showMessages}
         nbTotalMessages={bombCounts.totalBombs}
