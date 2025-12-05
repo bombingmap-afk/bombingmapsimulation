@@ -63,6 +63,8 @@ const microStates = [
   { name: "Turks and Caicos Islands", coordinates: [-71.7979, 21.694] },
   { name: "Tuvalu", coordinates: [179.194, -7.1095] },
   { name: "Vatican City", coordinates: [12.4534, 41.9029] },
+  { name: "Palestine", coordinates: [35.3632, 32.0659] },
+  { name: "Malta", coordinates: [14.381, 35.9446] },
   { name: "Barbados", coordinates: [-59.543198, 13.193887] },
   { name: "Saint Kitts and Nevis", coordinates: [-62.754593, 17.363747] },
   { name: "Grenada", coordinates: [-61.670761, 12.104818] },
