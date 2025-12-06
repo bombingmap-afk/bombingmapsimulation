@@ -8,6 +8,55 @@ const IP_LIMIT = 3;
 const MASTER_KEY = functions.config()?.iphash?.key || process.env.MASTER_IP_KEY || "";
 const TURNSTILE_SECRET = functions.config()?.turnstile?.secret || process.env.TURNSTILE_SECRET || "";
 
+const countries = [
+  "France", "Germany", "United Kingdom", "Spain", "Italy", "Netherlands",
+  "Belgium", "Switzerland", "Austria", "Portugal", "Sweden", "Norway",
+  "Denmark", "Finland", "Poland", "Czechia", "Hungary", "Romania",
+  "Bulgaria", "Croatia", "Greece", "Ireland", "Iceland", "Luxembourg",
+  "Malta", "Cyprus", "Estonia", "Latvia", "Lithuania", "Slovenia",
+  "Slovakia", "Serbia", "Montenegro", "Bosnia and Herz.", "Macedonia",
+  "Albania", "Moldova", "Ukraine", "Belarus", "Russia",
+  "United States of America", "Canada", "Mexico", "Bahamas", "Guatemala",
+  "Belize", "El Salvador", "Honduras", "Nicaragua", "Costa Rica",
+  "Panama", "Cuba", "Jamaica", "Haiti", "Dominican Rep.", "Puerto Rico",
+  "Brazil", "Argentina", "Chile", "Peru", "Colombia", "Venezuela",
+  "Ecuador", "Bolivia", "Paraguay", "Uruguay", "Guyana", "Suriname",
+  "China", "Japan", "South Korea", "North Korea", "India", "Kosovo",
+  "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Bhutan", "Myanmar",
+  "Thailand", "Vietnam", "Laos", "Cambodia", "Malaysia", "Singapore",
+  "Indonesia", "Philippines", "Brunei", "Mongolia", "Kazakhstan",
+  "Uzbekistan", "Turkmenistan", "Kyrgyzstan", "Tajikistan", "Afghanistan",
+  "Iran", "Iraq", "Turkey", "Syria", "Lebanon", "Jordan", "Israel",
+  "Palestine", "Saudi Arabia", "Yemen", "Oman", "United Arab Emirates",
+  "Qatar", "Bahrain", "Kuwait", "Georgia", "Armenia", "Azerbaijan",
+  "Timor-Leste", "Egypt", "Libya", "Tunisia", "Algeria", "Morocco",
+  "Sudan", "S. Sudan", "Ethiopia", "Eritrea", "Djibouti", "Somalia",
+  "Kenya", "Uganda", "Tanzania", "Rwanda", "Burundi",
+  "Dem. Rep. Congo", "Congo", "Central African Rep.", "Chad", "Cameroon",
+  "Nigeria", "Niger", "Mali", "Burkina Faso", "Senegal", "Gambia",
+  "Guinea-Bissau", "Guinea", "Sierra Leone", "Liberia", "Côte d'Ivoire",
+  "Ghana", "Togo", "Benin", "Mauritania", "Western Sahara",
+  "South Africa", "Namibia", "Botswana", "Zimbabwe", "Zambia", "Malawi",
+  "Mozambique", "Madagascar", "Mauritius", "Seychelles", "Comoros",
+  "Angola", "Gabon", "Eq. Guinea", "São Tomé and Príncipe",
+  "Cape Verde", "Lesotho", "eSwatini", "W. Sahara", "Somaliland",
+  "Australia", "New Zealand", "Papua New Guinea", "Fiji",
+  "Solomon Is.", "Vanuatu", "Samoa", "Tonga", "Kiribati", "Tuvalu",
+  "Nauru", "Palau", "Marshall Islands", "Micronesia", "New Caledonia",
+  "Cook Islands", "Niue", "American Samoa", "Guam",
+  "Northern Mariana Islands", "Greenland", "Faroe Islands", "Gibraltar",
+  "Vatican City", "San Marino", "Monaco", "Andorra", "Liechtenstein",
+  "Taiwan", "Hong Kong", "Macau", "U.S. Virgin Islands",
+  "British Virgin Islands", "Cayman Islands", "Turks and Caicos Islands",
+  "Bermuda", "Falkland Islands", "South Georgia", "Saint Helena",
+  "Ascension Island", "Tristan da Cunha",
+  "French Southern and Antarctic Lands", "Antarctica",
+  "Saint Kitts and Nevis", "Dominica", "Saint Lucia", "Barbados",
+  "Saint Vincent and the Grenadines", "Grenada", "Trinidad and Tobago",
+  "Falkland Is.", "N. Cyprus", "Fr. S. Antarctic Lands"
+]
+
+
 if (!MASTER_KEY) {
   console.warn("⚠️ MASTER_KEY not set");
 }
@@ -150,7 +199,13 @@ export const dropBomb = functions.runWith({
       );
     }
 
-    // === VÉRIFICATION TURNSTILE (PREMIÈRE LIGNE DE DÉFENSE) ===
+    if (!countries.includes(country)){
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Must be a valid country"
+      );
+    }
+
     const rawReq = context.rawRequest as any;
     const ip = getClientIp(rawReq);
     
