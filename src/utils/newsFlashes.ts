@@ -1450,6 +1450,240 @@ export const countrySpecificNews: Record<string, string[]> = {
     "🦏 Rhino conservation efforts paused, rhinos happier than expected",
     "🌾 Sugar cane plantations abandoned, Coca-Cola stock plummets",
   ],
+
+  // === OCÉANIE & PACIFIQUE ===
+
+  "Fiji": [
+    "🇫🇯 333 islands attempt simultaneous evacuation, coordination: impossible",
+    "🏉 Rugby team attempts to tackle threat, physics disagrees",
+    "🏝️ 'Fiji Water' company evacuates before citizens, priorities questioned",
+    "🎭 Cannibalism jokes suddenly inappropriate, historians apologize",
+    "🌺 Kava ceremonies paused for first time in 3,000 years, elders shocked",
+  ],
+
+  "Solomon Is.": [
+    "🇸🇧 900+ islands can't agree on evacuation plan, democracy's flaw exposed",
+    "🎭 WWII shipwrecks finally have company, maritime museum expands",
+    "🏝️ Guadalcanal veterans' descendants note 'we've literally seen worse'",
+    "🐚 Shell money currency proves useless in modern crisis",
+    "🌴 Coconuts fall prematurely, traditional omens confirmed accurate",
+  ],
+
+  "Vanuatu": [
+    "🇻🇺 80 islands speak 110 languages, evacuation announcements take 6 hours",
+    "🌋 Active volcanoes erupt in sympathy, volcanologists add to crisis list",
+    "🎭 Cargo cult believers await plane to save them, irony noted",
+    "🏝️ 'Happiest country on Earth' status revoked, happiness index: 0",
+    "🤿 Underwater post office closes, philatelists worldwide mourn",
+  ],
+
+  "Samoa": [
+    "🇼🇸 Polynesian navigation skills prove useless when nowhere to navigate to",
+    "🏉 Rugby players form human shield, prove ineffective",
+    "🎭 Samoan tattoos suddenly seem like poor life choice, artists apologize",
+    "🌴 Coconut crab invasion paused due to 'bigger concerns'",
+    "🏝️ Robert Louis Stevenson's grave opens, he climbs out, leaves island",
+  ],
+
+  "Tonga": [
+    "🇹🇴 Kingdom of 170+ islands realizes monarchy doesn't help in apocalypse",
+    "🌋 Underwater volcano erupts again, citizens claim 'not even surprised'",
+    "🏉 Rugby team attempts to tackle crisis, misses completely",
+    "🎭 Captain Cook's landing site closed for 'eternal maintenance'",
+    "🐋 Humpback whales flee breeding grounds, marine biologists concerned",
+  ],
+
+  "Kiribati": [
+    "🇰🇮 Country already sinking from climate change adds new problem to list",
+    "🏝️ 33 atolls span 3.5M km² of ocean, evacuation logistics: impossible",
+    "🎭 First country to see sunrise realizes disadvantage now",
+    "🐟 Fishing industry halts, Japan's sushi supply chain collapses",
+    "🌊 Sea level rise accelerates from panic waves, scientists measure",
+  ],
+
+  "Tuvalu": [
+    "🇹🇻 4th smallest country in world realizes size is not advantage",
+    "🏝️ Entire population of 11,000 fits on single atoll, departs immediately",
+    "🎭 '.tv' domain sales fund evacuation, techies donate",
+    "🌊 Already drowning from climate change, adds bombardment to résumé",
+    "🐠 Funafuti lagoon empties, fish file refugee claims in Fiji",
+  ],
+
+  "Nauru": [
+    "🇳🇷 Smallest island nation realizes 21 km² is nowhere to hide",
+    "⛏️ Phosphate mining destroyed 80% of land, karma finally arrives",
+    "🎭 Entire population of 12,000 fits in single refugee camp, coordinates accordingly",
+    "🏝️ Once richest country per capita, currently poorest in survival options",
+    "🐦 Nauru Reed Warbler (only endemic bird) flies away, doesn't return",
+  ],
+
+  "Palau": [
+    "🇵🇼 Jellyfish Lake's stingless jellies develop stingers from stress",
+    "🏝️ 340 islands attempt democratic vote on response, quorum: never",
+    "🎭 WWII wrecks in lagoon finally have modern company",
+    "🐠 Underwater biodiversity evacuates to Philippines, marine exodus",
+    "🤿 Dive sites empty despite being world's best, priorities correct",
+  ],
+
+  "Marshall Islands": [
+    "🇲🇭 Nuclear test site veterans note 'different radiation, same fear'",
+    "🏝️ 29 atolls scattered across 750,000 km² of ocean, coordination: lol",
+    "🎭 Bikini Atoll survivors claim experience doesn't help with this",
+    "☢️ Radioactive dome on Runit Island cracks open, adds to problems",
+    "🐠 Fish population finally recovers from nukes, immediately flees again",
+  ],
+
+  "Micronesia": [
+    "🇫🇲 607 islands form federation, can't federate response plan",
+    "🏝️ Yap's stone money proves useless in survival economy",
+    "🎭 Chuuk Lagoon WWII wrecks welcome new additions",
+    "🌺 Pohnpei's ancient ruins add modern destruction layer",
+    "🐠 Kosrae's pristine reefs evacuate fish to Guam",
+  ],
+
+  "New Caledonia": [
+    "🇳🇨 French territory realizes France too far to help",
+    "🦎 World's largest gecko population achieves majority, forms government",
+    "⛏️ Nickel mines close, Tesla stock plummets separately",
+    "🎭 Indigenous Kanak people note 'colonialism prepared us for disaster'",
+    "🏝️ Grande Terre attempts to float toward Australia, tectonic plates say no",
+  ],
+
+  "Cook Islands": [
+    "🇨🇰 15 islands named after British explorer flee British legacy",
+    "🏝️ Free association with New Zealand suddenly seems like good investment",
+    "🎭 Rarotonga empties, Aitutaki follows, outer islands already gone",
+    "🐚 Black pearl industry collapses, jewelry stores worldwide panic",
+    "🌺 Polynesian dance performances cancelled, tourists already fled anyway",
+  ],
+
+  "Niue": [
+    "🇳🇺 World's largest coral island, population: 1,600, evacuation time: 47 minutes",
+    "🏝️ Self-governing in free association with NZ calls for full association now",
+    "🎭 'Rock of Polynesia' nickname suddenly seems ominous",
+    "🐳 Humpback whales flee breeding grounds, broken-hearted tourists follow",
+    "🌴 Coconut crabs achieve sentience, demand seats in evacuation boats",
+  ],
+
+  "American Samoa": [
+    "🇦🇸 US territory realizes being American doesn't grant immunity",
+    "🏈 NFL pipeline to American football paused indefinitely",
+    "🎭 Tutuila residents flee to Hawaii, worsen their traffic",
+    "🏝️ Pago Pago harbor empties faster than tuna cannery shift change",
+    "🐟 StarKist tuna factory closes, sandwich industry collapses",
+  ],
+
+  "Guam": [
+    "🇬🇺 US military bases prove useless against existential threats",
+    "🎭 North Korean missile threat veterans claim 'we're experienced'",
+    "🏝️ Chamorro people invoke ancient spirits, spirits check voicemail",
+    "🏖️ Tumon Bay beaches empty, Korean tourists flee home",
+    "🦎 Brown tree snakes finally have island to themselves, celebrate briefly",
+  ],
+
+  "Northern Mariana Islands": [
+    "🇲🇵 Saipan realizes WWII battlefield experience doesn't transfer",
+    "🏝️ 14 islands attempt coordinated response, fail in 14 different ways",
+    "🎭 Japanese tourists flee to Japan, irony of history noted",
+    "🏖️ Beaches empty despite being paradise, casinos close",
+    "🐚 Aqua-blue waters turn murky from panic boat traffic",
+  ],
+
+  "Greenland": [
+    "🇬🇱 Largest island in world realizes size is hiding disadvantage",
+    "❄️ Ice sheet melts faster from collective anxiety radiation",
+    "🎭 Trump's purchase offer suddenly seems prescient, historians apologize",
+    "🏔️ Inuit survival skills finally relevant, workshops overbooked",
+    "🐻 Polar bears flee to Canada, climate refugees themselves",
+  ],
+
+  "Faroe Islands": [
+    "🇫🇴 18 islands between Iceland and Norway realize bad location",
+    "🐑 Sheep outnumber humans 2:1, stage democratic coup",
+    "🎭 Viking heritage proves useless in modern warfare",
+    "🏔️ Dramatic cliffs offer nowhere to hide, just dramatic death",
+    "🐟 Whaling industry paused, Sea Shepherd activists briefly celebrate",
+  ],
+
+  "Gibraltar": [
+    "🇬🇮 6.8 km² British territory realizes size matters",
+    "🐒 Barbary macaques achieve majority population, claim sovereignty",
+    "🎭 The Rock proves not as solid as name suggests",
+    "🏰 Tunnels from WWII repurposed, still inadequate",
+    "🇪🇸 Spain offers evacuation route, charges for historical grievances",
+  ],
+
+  "Vatican City": [
+    "🇻🇦 Smallest country in world realizes God's protection has limits",
+    "⛪ Pope issues emergency prayer, results pending",
+    "🎭 Swiss Guard attempts to guard Vatican, Renaissance pikes ineffective",
+    "🏛️ Sistine Chapel ceiling opens to release souls, Michelangelo spins in grave",
+    "📿 Rosary production increases 1000%, economics of faith tested",
+  ],
+
+  "San Marino": [
+    "🇸🇲 Oldest republic in world faces newest crisis, experience doesn't help",
+    "🏔️ Mountain fortress proves useless against aerial threats",
+    "🎭 Surrounded by Italy, realizes that's the problem",
+    "🏰 Three towers stand firm, population doesn't",
+    "🇮🇹 Requests annexation by Italy, Italy too busy panicking",
+  ],
+
+  "Monaco": [
+    "🇲🇨 Billionaires discover money can't buy safety, existential crisis ensues",
+    "🎰 Casino Royale empties, James Bond unavailable for comment",
+    "🏎️ F1 race cancelled, Lewis Hamilton flees to Britain",
+    "🎭 Prince Albert II evacuates on royal yacht, citizens swim behind",
+    "💎 2nd smallest country realizes being rich AND tiny is worst combination",
+  ],
+
+  "Andorra": [
+    "🇦🇩 Pyrenees mountain refuge proves useless, avalanche risk vs bombs",
+    "⛷️ Ski resorts close, European ski season cancelled",
+    "🎭 Tax haven status proves irrelevant during apocalypse",
+    "🏔️ Between France and Spain, both sides panicking equally",
+    "🛍️ Duty-free shopping paused, final sales become very final",
+  ],
+
+  "Liechtenstein": [
+    "🇱🇮 160 km² between Switzerland and Austria, both sides fleeing",
+    "🏔️ Alpine principality's ski slopes become evacuation slides",
+    "🎭 Prince Hans-Adam II abdicates to son during crisis, timing questioned",
+    "🏦 Banking sector liquidates, literally and figuratively",
+    "⚽ National football team too small to field proper defense (already was)",
+  ],
+
+  "Falkland Is.": [
+    "🇫🇰 Penguins outnumber humans 1000:1, establish penguin supremacy",
+    "🎭 UK-Argentina dispute paused for 'bigger concerns'",
+    "🐑 Sheep population refuses to evacuate, cite 'seen 1982'",
+    "🏝️ Remote South Atlantic location proves strategically useless",
+    "❄️ Margaret Thatcher's ghost emerges, says 'I told you so', vanishes",
+  ],
+
+  "N. Cyprus": [
+    "🏳️ Unrecognized state realizes recognition doesn't matter now",
+    "🎭 Turkish military bases prove decorative only",
+    "🏖️ Beaches empty despite being paradise, ghost town aesthetic achieved",
+    "🇨🇾 Buffer zone with Cyprus suddenly seems safest place",
+    "🫒 Olive trees wilt from stress, agricultural economy collapses",
+  ],
+
+  "Fr. S. Antarctic Lands": [
+    "🏳️ Penguins achieve unanimous control, scientific bases abandoned",
+    "❄️ Coldest place on Earth can't freeze panic",
+    "🎭 Research stations close, climate data collection paused",
+    "🐧 Emperor penguins march away from humans, documentary crew follows",
+    "🏔️ Antarctica proves even isolation has limits",
+  ],
+
+  "Antarctica": [
+    "🇦🇶 Penguins inherit the Earth, scientists confirm",
+    "❄️ Research stations abandoned, ice cores left in freezer ironically",
+    "🎭 Climate scientists flee, warn 'you should've listened about warming'",
+    "🐧 Emperor penguins establish new world order, surprisingly effective",
+    "🏔️ Only continent without indigenous humans keeps it that way",
+  ],
 };
 
 export function getRandomNews(countryName: string): string | null {
