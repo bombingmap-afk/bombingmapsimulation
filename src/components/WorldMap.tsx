@@ -161,20 +161,20 @@ const WorldMap: React.FC<WorldMapProps> = ({
     const intensity = bombCount === 0 ? 0 : bombCount / maxBombs;
 
     const getSpectrumColor = (intensity: number) => {
-      if (intensity === 0) return "#D1D5DB";
+      if (intensity === 0) return "#D1D5DB"; // Gris pour 0 bomb
 
       let r, g, b;
 
       if (intensity <= 0.2) {
         const t = intensity / 0.2;
-        r = Math.round(209 + (255 - 209) * t);
-        g = Math.round(213 + (255 - 213) * t);
-        b = Math.round(219 + (0 - 219) * t);
+        r = Math.round(216 + (255 - 216) * t);
+        g = Math.round(219 + (255 - 219) * t);
+        b = Math.round(185 + (150 - 185) * t);
       } else if (intensity <= 0.4) {
         const t = (intensity - 0.2) / 0.2;
         r = 255;
         g = Math.round(255 + (165 - 255) * t);
-        b = 0;
+        b = Math.round(150 + (0 - 150) * t);
       } else if (intensity <= 0.6) {
         const t = (intensity - 0.4) / 0.2;
         r = 255;
