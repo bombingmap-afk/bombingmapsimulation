@@ -136,69 +136,26 @@ const GIF: React.FC<{
   );
 };
 
-const BombForm: React.FC<BombFormProps> = ({
-  countryName,
-  turnstileToken,
-  setTurnstileToken,
-  onBomb,
-  onBack,
-}) => {
-  const [message, setMessage] = useState("");
-  const [gifUrl, setGifUrl] = useState("");
-  const [source, setSource] = useState("");
-  const [messageError, setMessageError] = useState("");
-  const [gifError, setGifError] = useState("");
+const AttackerCountry: React.FC<{
+  countryName: string;
+  setSource: (_: string) => void;
+}> = ({ countryName, setSource }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
-  const [turnstileTokenError, setTurnstileTokenError] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const countries = Object.entries(flags).map(
-    ([country, flag]) => `${flag} ${country}`
-  );
-
-  const isValidGifUrl = (url: string): boolean => {
-    if (!url.trim()) return true;
-    const pattern = /(https?:\/\/)?(www\.)?giphy\.com\/[^\s]+/i;
-    return pattern.test(url);
-  };
-
-  const handleMessageChange = (value: string) => {
-    setMessage(value.slice(0, 70));
-    if (messageError) setMessageError("");
-  };
-
-  const handleGifUrlChange = (value: string) => {
-    setGifUrl(value);
-    if (gifError) setGifError("");
-  };
+  const countries = Object.entries(flags)
+    .filter(([country, _]) => country !== countryName)
+    .map(([country, flag]) => `${flag} ${country}`);
 
   const handleSourceChange = (value: string) => {
     setSource(value);
     setSearchTerm(value);
     setIsOpen(false);
     setSelectedIndex(-1);
-  };
-
-  const handleBomb = () => {
-    let hasError = false;
-    if (!message.trim()) {
-      setMessageError("Please enter a message before dropping your bomb.");
-      hasError = true;
-    }
-    if (!isValidGifUrl(gifUrl)) {
-      setGifError("The GIF link must come from giphy.com");
-      hasError = true;
-    }
-    if (!turnstileToken) {
-      setTurnstileTokenError("Please complete the verification above");
-    }
-    if (hasError) return;
-
-    onBomb(message, gifUrl || undefined, source || undefined);
   };
 
   useEffect(() => {
@@ -263,6 +220,110 @@ const BombForm: React.FC<BombFormProps> = ({
   };
 
   return (
+    <div ref={containerRef}>
+      <label className="block text-white font-medium mb-2">
+        Attacking Country{" "}
+        <span className="text-[10px] text-gray-500">
+          (A country can't attack its own territory)
+        </span>
+      </label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Select attacking country..."
+          className="w-full pl-10 pr-10 py-2 bg-gray-700 text-white rounded-lg border border-gray-600
+                       focus:ring-2 focus:ring-red-500 focus:outline-none transition-all duration-200"
+        />
+        {searchTerm && (
+          <button
+            onClick={clearSearch}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+        {isOpen && filteredCountries.length > 0 && (
+          <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+            {filteredCountries.map((country, index) => (
+              <button
+                key={country}
+                onClick={() => handleSourceChange(country)}
+                className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors
+                             ${index === selectedIndex ? "bg-gray-700" : ""}
+                             ${index === 0 ? "rounded-t-lg" : ""}
+                             ${
+                               index === filteredCountries.length - 1
+                                 ? "rounded-b-lg"
+                                 : ""
+                             }
+                             text-white border-b border-gray-700 last:border-b-0`}
+              >
+                {country}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const BombForm: React.FC<BombFormProps> = ({
+  countryName,
+  turnstileToken,
+  setTurnstileToken,
+  onBomb,
+  onBack,
+}) => {
+  const [message, setMessage] = useState("");
+  const [gifUrl, setGifUrl] = useState("");
+  const [source, setSource] = useState("");
+  const [messageError, setMessageError] = useState("");
+  const [gifError, setGifError] = useState("");
+  const [turnstileTokenError, setTurnstileTokenError] = useState("");
+
+  const isValidGifUrl = (url: string): boolean => {
+    if (!url.trim()) return true;
+    const pattern = /(https?:\/\/)?(www\.)?giphy\.com\/[^\s]+/i;
+    return pattern.test(url);
+  };
+
+  const handleMessageChange = (value: string) => {
+    setMessage(value.slice(0, 70));
+    if (messageError) setMessageError("");
+  };
+
+  const handleGifUrlChange = (value: string) => {
+    setGifUrl(value);
+    if (gifError) setGifError("");
+  };
+
+  const handleBomb = () => {
+    let hasError = false;
+    if (!message.trim()) {
+      setMessageError("Please enter a message before dropping your bomb.");
+      hasError = true;
+    }
+    if (!isValidGifUrl(gifUrl)) {
+      setGifError("The GIF link must come from giphy.com");
+      hasError = true;
+    }
+    if (!turnstileToken) {
+      setTurnstileTokenError("Please complete the verification above");
+    }
+    if (hasError) return;
+
+    onBomb(message, gifUrl || undefined, source || undefined);
+  };
+
+  return (
     <div className="space-y-6">
       <Title countryName={countryName} />
       <Message
@@ -277,55 +338,7 @@ const BombForm: React.FC<BombFormProps> = ({
         handleGifUrlChange={handleGifUrlChange}
         isValidGifUrl={isValidGifUrl}
       />
-      <div ref={containerRef}>
-        <label className="block text-white font-medium mb-2">
-          Attacking Country
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            ref={inputRef}
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Select attacking country..."
-            className="w-full pl-10 pr-10 py-2 bg-gray-700 text-white rounded-lg border border-gray-600
-                       focus:ring-2 focus:ring-red-500 focus:outline-none transition-all duration-200"
-          />
-          {searchTerm && (
-            <button
-              onClick={clearSearch}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-          {isOpen && filteredCountries.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-              {filteredCountries.map((country, index) => (
-                <button
-                  key={country}
-                  onClick={() => handleSourceChange(country)}
-                  className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors
-                             ${index === selectedIndex ? "bg-gray-700" : ""}
-                             ${index === 0 ? "rounded-t-lg" : ""}
-                             ${
-                               index === filteredCountries.length - 1
-                                 ? "rounded-b-lg"
-                                 : ""
-                             }
-                             text-white border-b border-gray-700 last:border-b-0`}
-                >
-                  {country}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <AttackerCountry countryName={countryName} setSource={setSource} />
       <TurnstileWidget
         onVerify={setTurnstileToken}
         onError={() => setTurnstileToken(null)}
