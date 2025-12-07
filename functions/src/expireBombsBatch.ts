@@ -42,13 +42,21 @@ export async function expireBombsLogic() {
   });
 
   const statsRef = db.collection("stats_24h").doc("counts");
-  const statsUpdate: any = { total: admin.firestore.FieldValue.increment(-expiredSnapshot.size) };
+  const countriesUpdate: Record<string, admin.firestore.FieldValue> = {};
   for (const country in countryCounts) {
-    statsUpdate[`countries.${country}`] = admin.firestore.FieldValue.increment(-countryCounts[country]);
+    countriesUpdate[country] = admin.firestore.FieldValue.increment(-countryCounts[country]);
   }
-  batch.update(statsRef, statsUpdate);
 
-  await batch.commit();
+  batch.set(
+    statsRef,
+    {
+      total: admin.firestore.FieldValue.increment(-expiredSnapshot.size),
+      countries: countriesUpdate,
+    },
+    { merge: true }
+  );
+
+await batch.commit();
   return expiredSnapshot.size;
 }
 

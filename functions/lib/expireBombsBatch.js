@@ -65,11 +65,14 @@ async function expireBombsLogic() {
         batch.delete(doc.ref);
     });
     const statsRef = firebase_1.db.collection("stats_24h").doc("counts");
-    const statsUpdate = { total: admin.firestore.FieldValue.increment(-expiredSnapshot.size) };
+    const countriesUpdate = {};
     for (const country in countryCounts) {
-        statsUpdate[`countries.${country}`] = admin.firestore.FieldValue.increment(-countryCounts[country]);
+        countriesUpdate[country] = admin.firestore.FieldValue.increment(-countryCounts[country]);
     }
-    batch.update(statsRef, statsUpdate);
+    batch.set(statsRef, {
+        total: admin.firestore.FieldValue.increment(-expiredSnapshot.size),
+        countries: countriesUpdate,
+    }, { merge: true });
     await batch.commit();
     return expiredSnapshot.size;
 }
