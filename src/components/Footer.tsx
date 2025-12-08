@@ -49,7 +49,7 @@ const Disclaimer: React.FC = () => {
           <p>bombingmap@gmail.com</p>
         </div>
 
-        <a
+        {/* <a
           className="flex items-center space-x-2 text-blue-400"
           href="https://x.com/BestBombingMap"
           target="_blank"
@@ -57,7 +57,7 @@ const Disclaimer: React.FC = () => {
         >
           <X className="w-4 h-4" />
           <span>https://x.com/BestBombingMap</span>
-        </a>
+        </a> */}
       </div>
     </div>
   );
