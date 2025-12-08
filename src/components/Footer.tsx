@@ -1,4 +1,4 @@
-import { FileText, Mail, Shield } from "lucide-react";
+import { FileText, Mail, Shield, X } from "lucide-react";
 
 import React from "react";
 
@@ -44,8 +44,20 @@ const Disclaimer: React.FC = () => {
         <h3 className="text-white font-semibold">Contact</h3>
       </div>
       <div className="space-y-2 text-sm text-gray-400">
-        <p>For legal inquiries or concerns:</p>
-        <p className="text-blue-400">bombingmap@gmail.com</p>
+        <div className="flex items-center space-x-2">
+          <Mail className="w-4 h-4 text-blue-400" />
+          <p>bombingmap@gmail.com</p>
+        </div>
+
+        <a
+          className="flex items-center space-x-2 text-blue-400"
+          href="https://x.com/BestBombingMap"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <X className="w-4 h-4" />
+          <span>https://x.com/BestBombingMap</span>
+        </a>
       </div>
     </div>
   );

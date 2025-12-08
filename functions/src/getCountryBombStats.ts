@@ -22,7 +22,7 @@ export const getCountryBombStats = functions.https.onCall(
     }
 
     const snapshot = await db
-      .collection("stats_24h")
+      .collection("stats_week")
       .get();
 
     const countryCounts: Record<string, number> = {};

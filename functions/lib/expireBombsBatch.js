@@ -64,7 +64,7 @@ async function expireBombsLogic() {
         batch.set(expiredRef, Object.assign(Object.assign({}, data), { expiredAt: now, expiredDate: dayId }));
         batch.delete(doc.ref);
     });
-    const statsRef = firebase_1.db.collection("stats_24h").doc("counts");
+    const statsRef = firebase_1.db.collection("stats_week").doc("counts");
     const countriesUpdate = {};
     for (const country in countryCounts) {
         countriesUpdate[country] = admin.firestore.FieldValue.increment(-countryCounts[country]);

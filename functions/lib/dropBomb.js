@@ -219,7 +219,7 @@ exports.dropBomb = functions.runWith({
     const sessionDocRef = firebase_1.db.collection("sessions").doc(sessionDocId);
     const statsDailyRef = firebase_1.db.collection("stats_daily").doc(getDayString());
     const bombsRef = firebase_1.db.collection("bombs").doc();
-    const stats24hRef = firebase_1.db.collection("stats_24h").doc("counts");
+    const stats24hRef = firebase_1.db.collection("stats_week").doc("counts");
     // === TRANSACTION ===
     try {
         await firebase_1.db.runTransaction(async (tx) => {
@@ -241,7 +241,7 @@ exports.dropBomb = functions.runWith({
             const nextMidnight = new Date();
             nextMidnight.setUTCHours(24, 0, 0, 0);
             const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
-            const bombExpiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
+            const bombExpiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
             // Mise à jour IP counter
             tx.set(ipDocRef, {
                 count: ipCount + 1,

@@ -41,7 +41,7 @@ export async function expireBombsLogic() {
     batch.delete(doc.ref);
   });
 
-  const statsRef = db.collection("stats_24h").doc("counts");
+  const statsRef = db.collection("stats_week").doc("counts");
   const countriesUpdate: Record<string, admin.firestore.FieldValue> = {};
   for (const country in countryCounts) {
     countriesUpdate[country] = admin.firestore.FieldValue.increment(-countryCounts[country]);

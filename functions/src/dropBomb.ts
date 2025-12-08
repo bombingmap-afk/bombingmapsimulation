@@ -221,7 +221,7 @@ export const dropBomb = functions.runWith({
     const sessionDocRef = db.collection("sessions").doc(sessionDocId);
     const statsDailyRef = db.collection("stats_daily").doc(getDayString());
     const bombsRef = db.collection("bombs").doc();
-    const stats24hRef = db.collection("stats_24h").doc("counts");
+    const stats24hRef = db.collection("stats_week").doc("counts");
 
     // === TRANSACTION ===
     try {
@@ -254,7 +254,7 @@ export const dropBomb = functions.runWith({
         nextMidnight.setUTCHours(24, 0, 0, 0);
         const expiresAt = admin.firestore.Timestamp.fromDate(nextMidnight);
         const bombExpiresAt = admin.firestore.Timestamp.fromDate(
-          new Date(Date.now() + 24 * 60 * 60 * 1000)
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         );
 
         // Mise à jour IP counter

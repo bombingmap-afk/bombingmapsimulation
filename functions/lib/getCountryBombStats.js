@@ -45,7 +45,7 @@ exports.getCountryBombStats = functions.https.onCall(async (data, context) => {
         return statsCache.data;
     }
     const snapshot = await firebase_1.db
-        .collection("stats_24h")
+        .collection("stats_week")
         .get();
     const countryCounts = {};
     snapshot.forEach((doc) => {

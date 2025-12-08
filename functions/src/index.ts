@@ -4,3 +4,4 @@ export * from "./dropBomb";
 export * from "./getCountryBombStats";
 export * from "./getCountryMessages";
 export * from "./expireBombsBatch";
+export * from "./migrateToWeeklyExpiration";
