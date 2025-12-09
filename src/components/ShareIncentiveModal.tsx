@@ -49,11 +49,11 @@ export default function ShareIncentiveModal({
       ""
     )}`,
 
-    whatsapp: `💣 J'AI BOMBARDÉ ${countryBombed.toUpperCase()} ${flagEmoji}\n\n${totalBombsGlobal.toLocaleString()}+ joueurs dans la guerre mondiale !\n\nChoisis ta cible : ${siteUrl}`,
+    whatsapp: `💣 I just NUKED ${countryBombed.toUpperCase()} ${flagEmoji}\n\n${totalBombsGlobal.toLocaleString()}+ bombs in this World War!\n\nChoisis ta cible : ${siteUrl}`,
 
     reddit: `I just bombed ${countryBombed} on the World Bombing Map 💣\n\nOver ${totalBombsGlobal.toLocaleString()} bombs dropped so far in this social experiment!\n\nJoin the chaos: ${siteUrl}`,
 
-    generic: `💣 I just bombed ${countryBombed}!\n\nJoin ${totalBombsGlobal.toLocaleString()}+ players: ${siteUrl}`,
+    generic: `💣 I just bombed ${countryBombed}!\n\nJoin ${totalBombsGlobal.toLocaleString()}+ bombers: ${siteUrl}`,
   };
 
   const handleShare = (platform: string) => {
