@@ -9,6 +9,7 @@ import LegalDisclaimer from "./components/LegalDisclaimer";
 import MessagesSidebar from "./components/MessagesSidebar";
 import NewsFlash from "./components/NewsFlash";
 import RefreshButton from "./components/RefreshButton";
+import ShareIncentiveModal from "./components/ShareIncentiveModal";
 import WorldMap from "./components/WorldMap";
 import { canBombToday } from "./utils/dateUtils";
 import { functions } from "./config/firebase";
@@ -38,6 +39,8 @@ function App() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [currentNews, setCurrentNews] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [lastBombedCountry, setLastBombedCountry] = useState("");
 
   const [bombCounts, setBombCounts] = useState({
     countryBombCounts: new Map<string, number>(),
@@ -103,6 +106,16 @@ function App() {
 
         const newsMessage = getRandomNews(countryName);
         setCurrentNews(newsMessage ? `${countryName}: ${newsMessage}` : null);
+        setLastBombedCountry(countryName);
+
+        const shouldShowModal =
+          userSession.totalBombs > 0 && Math.random() > 0.65;
+
+        if (shouldShowModal) {
+          setTimeout(() => {
+            setShowShareModal(true);
+          }, 3000);
+        }
 
         refreshStats();
         setTurnstileToken(null);
@@ -230,6 +243,13 @@ function App() {
         isOpen={showMessages}
         nbTotalMessages={bombCounts.totalBombs}
         onClose={() => setShowMessages(false)}
+      />
+      <ShareIncentiveModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        countryBombed={lastBombedCountry}
+        totalBombsGlobal={bombCounts.totalBombs}
+        userTotalBombs={userSession.totalBombs}
       />
     </div>
   );
