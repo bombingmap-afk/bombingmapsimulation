@@ -1,4 +1,4 @@
-import { Check, Copy, MessageCircle, Share2, Trophy } from "lucide-react";
+import { Check, Copy, MessageCircle, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getCountryFlag } from "../utils/countryFlags";
@@ -20,7 +20,6 @@ export default function ShareIncentiveModal({
 }: ShareIncentiveModalProps) {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(10);
-  const [hasShared, setHasShared] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -76,8 +75,6 @@ export default function ShareIncentiveModal({
       "width=600,height=400"
     );
 
-    setHasShared(true);
-
     // Track avec Google Analytics
     if (window.gtag) {
       window.gtag("event", "share", {
@@ -95,7 +92,6 @@ export default function ShareIncentiveModal({
     try {
       await navigator.clipboard.writeText(siteUrl);
       setCopied(true);
-      setHasShared(true);
 
       if (window.gtag) {
         window.gtag("event", "share", {
