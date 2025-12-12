@@ -109,7 +109,7 @@ function App() {
         setLastBombedCountry(countryName);
 
         const shouldShowModal =
-          userSession.totalBombs > 0 && Math.random() > 0.65;
+          userSession.totalBombs === 0 || Math.random() > 0.65;
 
         if (shouldShowModal) {
           setTimeout(() => {
