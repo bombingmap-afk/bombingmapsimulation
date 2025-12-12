@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({
               <Users className="w-5 h-5" />
               <span className="font-medium">
                 {totalBombs} bomb
-                {totalBombs > 1 ? "s" : ""} in one week
+                {totalBombs > 1 ? "s" : ""} since the beginning
               </span>
             </div>
             <div className="flex items-center space-x-2">
